@@ -1,0 +1,650 @@
+/* filename: popup.css - Styles for PhishNet Extension (Minimal Update) */
+
+/* ========================================================================= */
+/* 1. Imports and CSS Variables */
+/* ========================================================================= */
+
+:root {
+    /* Colors (Dark Theme) - Black & Red Focus */
+    --color-safe: #00FF88;
+    --color-malicious: #FF4D4D;
+    --color-suspicious: #FFC107;
+
+    --color-bg-primary: #0B0B0B;
+    --color-bg-secondary: #1A0000;
+    --color-card: #2A0000; /* Slightly lighter for cards */
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #FF4D4D;
+    --color-border: #4A0000;
+    
+    /* Primary Gradient (For Header/Hero) */
+    --gradient-header: linear-gradient(90deg, #2A0000 0%, #0B0B0B 100%);
+    
+    /* Spacing and Dimensions */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    
+    /* Typography */
+    --font-primary: 'Poppins', 'Inter', sans-serif;
+    
+    /* Animations */
+    --transition-speed: 0.3s;
+    --animation-duration: 0.5s;
+}
+
+/* ========================================================================= */
+/* 2. Base & Reset Styles */
+/* ========================================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-primary);
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    line-height: 1.6;
+    width: 380px;
+    height: 600px; /* Fixed height */
+    max-height: 600px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+h1, h2, h3 {
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+h1.logo-text { font-size: 1.25rem; margin: 0; }
+h2 { font-size: 1.1rem; }
+h3 { font-size: 1rem; margin-bottom: var(--space-sm); }
+h3.settings-subtitle {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: var(--space-sm);
+}
+
+a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: opacity var(--transition-speed);
+}
+a:hover { opacity: 0.8; }
+p { opacity: 0.9; }
+
+hr.divider {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: var(--space-md) 0;
+}
+
+.hidden { display: none !important; }
+
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-text-secondary);
+    color: var(--color-bg-primary);
+    padding: var(--space-sm);
+    z-index: 9999;
+    transition: top var(--transition-speed);
+}
+.skip-link:focus { top: 0; }
+
+:focus-visible {
+    outline: 2px solid var(--color-text-secondary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+/* ========================================================================= */
+/* 3. Layout (Header, Main, Footer) */
+/* ========================================================================= */
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--gradient-header);
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+}
+
+.header-left, .header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+/* Main content is now a flex container centered */
+.main-content {
+    flex-grow: 1;
+    padding: var(--space-lg);
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+/* Page navigation for main vs premium */
+.page-view {
+    display: flex;
+    flex-direction: column;
+}
+.page-view.hidden {
+    display: none;
+}
+/* Center the main content page */
+#main-content.page-view {
+    justify-content: center; /* Center the button vertically */
+}
+
+
+.footer-container {
+    padding: var(--space-md);
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    flex-shrink: 0;
+}
+
+.legal-footer {
+    font-size: 0.7rem;
+    text-align: center;
+    color: #aaa;
+}
+.legal-footer a {
+    color: #ccc;
+    text-decoration: underline;
+}
+
+/* ========================================================================= */
+/* 4. Components (Buttons, Cards, Forms, Toggle) */
+/* ========================================================================= */
+
+.btn {
+    display: inline-block;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    border: 2px solid transparent;
+    font-size: 0.875rem;
+}
+
+.btn-primary {
+    background-color: var(--color-malicious);
+    color: var(--color-bg-primary);
+    box-shadow: 0 4px 10px rgba(255, 77, 77, 0.3);
+}
+.btn-primary:hover {
+    background-color: #ff6a6a;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 2px solid var(--color-text-secondary);
+    color: var(--color-text-secondary);
+}
+.btn-secondary:hover {
+    background-color: var(--color-text-secondary);
+    color: var(--color-bg-primary);
+}
+
+.btn-sm {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.75rem;
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    padding: var(--space-xs);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.icon-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.card {
+    background-color: var(--color-card);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+.card .form-group:last-child {
+    margin-bottom: 0;
+}
+
+input[type="text"], textarea {
+    width: 100%;
+    padding: var(--space-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-primary);
+}
+textarea { resize: vertical; }
+
+.toggle-switch { font-size: 0.9rem; }
+.toggle-input { height: 0; width: 0; visibility: hidden; }
+.toggle-label {
+    cursor: pointer;
+    width: 40px;
+    height: 22px;
+    background: #555;
+    display: block;
+    border-radius: 11px;
+    position: relative;
+    flex-shrink: 0;
+    transition: background-color var(--transition-speed);
+}
+.toggle-label:after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    transition: left var(--transition-speed);
+}
+.toggle-input:checked + .toggle-label {
+    background: var(--color-malicious);
+}
+.toggle-input:checked + .toggle-label:after {
+    left: calc(100% - 2px);
+    transform: translateX(-100%);
+}
+
+.item-list {
+    list-style: none;
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm);
+    background: var(--color-bg-primary);
+}
+.item-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-xs) 0;
+    border-bottom: 1px solid var(--color-border);
+}
+.item-list li:last-child { border-bottom: none; }
+.item-list .remove-btn {
+    color: var(--color-malicious);
+    font-size: 1.2rem;
+    padding: 0 4px;
+}
+
+/* ========================================================================= */
+/* 5. Main UI Components (MINIMAL UPDATE) */
+/* ========================================================================= */
+
+.user-info { display: none; }
+.logged-in .user-info { display: flex; align-items: center; gap: var(--space-sm); }
+.logged-in .auth-buttons { display: none; }
+.user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--color-text-secondary);
+    color: var(--color-bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#username-display { font-size: 0.85rem; font-weight: 600; }
+
+/* Main Protection Dial (MINIMAL) */
+.protection-dial-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md); /* Increased gap */
+}
+.protection-dial {
+    width: 160px; /* Larger */
+    height: 160px;
+    border-radius: 50%;
+    border: 2px solid var(--color-border);
+    /* Flat, clean background */
+    background-color: var(--color-card);
+    color: #aaa; /* OFF state color */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+.protection-dial:hover {
+    border-color: var(--color-text-secondary);
+}
+.protection-dial .dial-icon {
+    transition: all var(--transition-speed);
+}
+.protection-dial .dial-status-text {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-top: var(--space-xs);
+}
+
+/* Active (ON) State (MINIMAL) */
+.protection-dial.is-active {
+    /* Flat, clean red */
+    background-color: var(--color-malicious);
+    border-color: var(--color-malicious);
+    color: var(--color-text-primary);
+    /* Subtle glow */
+    box-shadow: 0 0 20px rgba(255, 77, 77, 0.5);
+}
+.protection-dial.is-active:hover {
+    background-color: #ff6a6a;
+}
+
+.timer-display {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    opacity: 0;
+    transition: opacity var(--transition-speed);
+}
+.timer-display.is-visible { opacity: 1; }
+
+/* "Always On" toggle now lives outside a card */
+.controls-container-minimal {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-md);
+}
+.controls-container-minimal .form-group {
+    margin-bottom: 0;
+}
+
+/* ========================================================================= */
+/* 6. Modals & Drawers */
+/* ========================================================================= */
+
+.modal-container,
+.drawer-container {
+    position: absolute; /* NOT fixed */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-speed) ease, visibility 0s var(--transition-speed);
+}
+.modal-container:not(.hidden),
+.drawer-container:not(.hidden) {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+}
+
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    cursor: pointer;
+}
+
+.modal-content {
+    position: relative;
+    z-index: 101;
+    width: 90%;
+    max-width: 340px;
+    transform: scale(0.9);
+    transition: transform var(--transition-speed) ease;
+}
+.modal-container:not(.hidden) .modal-content {
+    transform: scale(1);
+}
+
+.modal-header, .drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-md);
+}
+.modal-body, .drawer-body {
+    max-height: 350px;
+    overflow-y: auto;
+}
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--space-md);
+}
+
+/* Drawer Specifics */
+.drawer-container { justify-content: flex-start; }
+.drawer-content {
+    background: var(--color-bg-secondary);
+    height: 100%;
+    width: 80%;
+    max-width: 300px;
+    border-right: 1px solid var(--color-border);
+    padding: var(--space-md);
+    position: relative;
+    z-index: 101;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform var(--transition-speed) ease;
+}
+.drawer-container:not(.hidden) .drawer-content {
+    transform: translateX(0);
+}
+.drawer-body { flex-grow: 1; max-height: none; }
+
+.menu-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+.menu-list li a,
+.menu-list li button {
+    display: block;
+    padding: var(--space-sm);
+    color: var(--color-text-primary);
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-speed);
+    background: none;
+    border: none;
+    font-family: var(--font-primary);
+    font-size: 1rem;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+.menu-list li a:hover,
+.menu-list li button:hover {
+    background-color: rgba(255, 77, 77, 0.1);
+    color: var(--color-text-secondary);
+}
+
+.onboarding-step { margin-bottom: var(--space-md); }
+
+.toast {
+    position: absolute;
+    bottom: var(--space-lg);
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--color-text-secondary);
+    color: var(--color-bg-primary);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    z-index: 200;
+    opacity: 0;
+    transition: opacity var(--transition-speed);
+}
+.toast:not(.hidden) { opacity: 1; }
+
+/* ========================================================================= */
+/* 7. NEW: Page Navigation & Premium Styles */
+/* ========================================================================= */
+
+.page-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+    flex-shrink: 0;
+}
+.page-header .icon-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+.page-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.pricing-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.pricing-card {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    border-left-width: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.pricing-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.pricing-card .price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: var(--space-xs) 0;
+}
+.pricing-card .price .price-per {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: #aaa;
+}
+
+.pricing-card .features-list {
+    list-style: none;
+    margin: var(--space-md) 0;
+    padding-left: var(--space-sm);
+}
+.features-list li {
+    font-size: 0.875rem;
+    color: #ccc;
+    position: relative;
+    padding-left: var(--space-md);
+    margin-bottom: var(--space-xs);
+}
+.features-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    font-weight: 600;
+}
+
+/* Plan-specific colors */
+.pricing-card.free { border-left-color: var(--color-safe); }
+.pricing-card.free .features-list li::before { color: var(--color-safe); }
+
+.pricing-card.monthly { border-left-color: var(--color-suspicious); }
+.pricing-card.monthly .features-list li::before { color: var(--color-suspicious); }
+
+.pricing-card.annual { border-left-color: var(--color-malicious); }
+.pricing-card.annual .features-list li::before { color: var(--color-malicious); }
+
+.pricing-card .btn { width: 100%; }
+
+.best-value-badge {
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    background-color: var(--color-malicious);
+    color: var(--color-bg-primary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 0 0 0 var(--radius-md);
+}
+
+
+/* ========================================================================= */
+/* 8. Reduced Motion */
+/* ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    .btn-cta {
+        animation: none;
+    }
+}
