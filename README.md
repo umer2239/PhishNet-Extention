@@ -1,73 +1,47 @@
-📌 PhishNet — Browser Extension
+# 📌 PhishNet — Browser Extension
 
-PhishNet is a browser extension designed to help users detect, prevent, and stay aware of phishing threats while browsing the web. It provides real-time insights and alerts to keep users safe from suspicious websites.
+PhishNet is a browser extension designed to detect and prevent phishing threats. It helps users browse safely by analyzing websites and displaying warnings inside a clean, user-friendly popup interface.
 
-📁 Project Structure
+---
 
-This extension includes the following key popup interface files:
+## 📁 Project Files
 
-1. popup.html
+### **1. `popup.html`**
+- Main HTML structure for the extension popup.
+- Loads styles (`popup.css`) and scripts (`popup.js`).
+- Displays the UI when the extension icon is clicked.
 
-The main HTML document for the extension’s popup window
+### **2. `popup.css`**
+- Contains all the styling rules for the popup interface.
+- Controls layout, colors, fonts, spacing, and visuals.
+- Makes the popup clean, responsive, and attractive.
 
-Provides the UI layout and displays extension information
+### **3. `popup.js`**
+- Adds interactivity to the popup.
+- Handles button clicks, events, and data updates.
+- Can communicate with background scripts or APIs.
 
-Loads popup.css and popup.js for styling and interactivity
+---
 
-2. popup.css
+## 🚀 Features
+- Detects potential phishing indicators.
+- Shows safety alerts and important warnings.
+- Minimal and responsive popup interface.
+- Fast, lightweight, and easy to use.
 
-Contains all styling rules for the popup window
+---
 
-Defines colors, layout, typography, and animations
+## 🔧 Installation (Developer Mode)
 
-Ensures the popup remains clean, responsive, and visually appealing
+1. Download or clone this repository.
+2. Open **Google Chrome** and go to:
+3. Enable **Developer Mode** (top right).
+4. Click **Load unpacked**.
+5. Select the folder containing your extension files.
+6. The PhishNet extension will appear in your browser toolbar.
 
-3. popup.js
+---
 
-Handles all interactive functionality of the popup
-
-Connects UI actions (buttons, clicks, inputs) to extension logic
-
-Can communicate with background scripts, content scripts, or APIs
-
-🚀 Features
-
-Detects potential phishing indicators
-
-Displays warnings and safety checks
-
-Clean and user-friendly popup UI
-
-Lightweight, fast, and easy to use
-
-🔧 Installation (Developer Mode)
-
-Download or clone this repository
-
-Open Chrome → go to:
-chrome://extensions/
-
-Enable Developer Mode
-
-Click Load unpacked
-
-Select your extension folder
-
-The PhishNet extension will appear in the browser toolbar
-
-📷 Popup Interface
-
-This project includes the popup interface built using:
-
-popup.html
-
-popup.css
-
-popup.js
-
-This handles the UI that appears when the extension icon is clicked.
-
-🤝 Contributing
-
-Contributions, suggestions, and improvements are welcome!
-Feel free to create pull requests or open issues.
+## 🤝 Contributing
+Suggestions and improvements are welcome!  
+Feel free to open an issue or submit a pull request.
