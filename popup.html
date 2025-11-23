@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PhishNet Protection</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
@@ -19,7 +21,7 @@
         </div>
         <div class="header-right">
             <div class="auth-buttons">
-                <a href="#" id="login-link-header" class="btn btn-sm btn-secondary" target="_blank" rel="noopener noreferrer">Login</a>
+                <button id="login-btn-header" class="btn btn-sm btn-secondary">Demo Login</button>
                 <a href="#" id="signup-link-header" class="btn btn-sm btn-primary" target="_blank" rel="noopener noreferrer">Sign Up</a>
             </div>
             <div class="user-info">
@@ -32,7 +34,6 @@
     </header>
 
     <main id="main-content" class="main-content page-view">
-        
         <section class="protection-dial-container">
             <button id="main-toggle-btn" class="protection-dial" role="switch" aria-checked="false" aria-label="Toggle PhishNet Protection">
                 <div class="dial-icon">
@@ -50,7 +51,6 @@
                 <span>Keep extension always ON</span>
             </div>
         </section>
-        
     </main>
     
     <section id="premium-page" class="main-content page-view hidden">
@@ -98,7 +98,6 @@
         </div>
     </section>
 
-
     <footer class="footer-container">
         <p class="legal-footer">
             By using the extension you agree with
@@ -106,6 +105,36 @@
             <a href="#" id="privacy-link" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
         </p>
     </footer>
+
+    <div id="login-modal" class="modal-container hidden" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
+        <div class="modal-backdrop" data-close-modal></div>
+        <div class="modal-content card" role="document">
+            <header class="modal-header">
+                <h2 id="login-modal-title">PhishNet Login</h2>
+                <button class="icon-btn" data-close-modal aria-label="Close modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
+                </button>
+            </header>
+            <div class="modal-body">
+                <div class="form-group" style="flex-direction: column; align-items: flex-start;">
+                    <label for="login-email" style="margin-bottom: 0.5rem;">Email</label>
+                    <input type="email" id="login-email" placeholder="demo@phishnet.com" value="demo@phishnet.com">
+                </div>
+                <div class="form-group" style="flex-direction: column; align-items: flex-start;">
+                    <label for="login-password" style="margin-bottom: 0.5rem;">Password</label>
+                    <input type="password" id="login-password" placeholder="Demo123!" value="Demo123!">
+                </div>
+                <p style="font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 1rem;">
+                    Demo credentials pre-filled. Click Login to continue.
+                </p>
+                <button id="login-submit-btn" class="btn btn-primary" style="width: 100%;">Login</button>
+                <hr class="divider">
+                <p style="text-align: center; font-size: 0.85rem; color: var(--color-text-secondary);">
+                    Demo account for testing. All data is local.
+                </p>
+            </div>
+        </div>
+    </div>
 
     <div id="menu-drawer" class="drawer-container hidden" role="dialog" aria-modal="true" aria-labelledby="menu-title">
         <div class="drawer-backdrop" data-close-modal></div>
@@ -117,10 +146,9 @@
                 </button>
             </header>
             <div class="drawer-body">
-                
                 <ul class="menu-list user-info">
                     <li><a href="#" id="dashboard-link" target="_blank" rel="noopener noreferrer">My Dashboard</a></li>
-                    </ul>
+                </ul>
                 
                 <hr class="divider">
                 
@@ -143,20 +171,20 @@
         </nav>
     </div>
 
-    <div id="login-gating-modal" class="modal-container hidden" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
+    <div id="login-gating-modal" class="modal-container hidden" role="dialog" aria-modal="true" aria-labelledby="login-gating-title">
         <div class="modal-backdrop" data-close-modal></div>
         <div class="modal-content card" role="document">
             <header class="modal-header">
-                <h2 id="login-modal-title">Protection Locked</h2>
+                <h2 id="login-gating-title">Protection Locked</h2>
                 <button class="icon-btn" data-close-modal aria-label="Close modal">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
                 </button>
             </header>
             <div class="modal-body">
-                <p>Please log in or create an account to activate PhishNet protection.</p>
-                <div class="action-buttons" style="margin-top: 20px;">
-                    <a href="#" id="login-link-modal" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">Login</a>
-                    <a href="#" id="signup-link-modal" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Sign Up</a>
+                <p>Please log in to activate PhishNet protection.</p>
+                <div class="action-buttons" style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button id="login-from-gating-btn" class="btn btn-primary" style="flex: 1;">Demo Login</button>
+                    <a href="#" id="signup-from-gating-btn" class="btn btn-secondary" target="_blank" rel="noopener noreferrer" style="flex: 1; display: block;">Sign Up</a>
                 </div>
             </div>
         </div>
@@ -213,8 +241,9 @@
             </header>
             <div class="modal-body">
                 <p>Paste the full email source (including headers) or a suspicious URL for analysis.</p>
-                <textarea id="email-content-input" rows="8" placeholder="Paste full email source or URL here..."></textarea>
-                <button id="email-submit-btn" class="btn btn-primary" style="margin-top: 10px;">Submit for Analysis</button>
+                <textarea id="email-content-input" rows="6" placeholder="Paste email source or URL here..."></textarea>
+                <button id="email-submit-btn" class="btn btn-primary" style="margin-top: 10px;">Submit Report</button>
+                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--color-text-secondary);">Our security team will review within 24 hours.</p>
             </div>
         </div>
     </div>
@@ -229,78 +258,39 @@
                 </button>
             </header>
             <div class="modal-body">
-                
-                <h3 class="settings-subtitle">Scan Settings</h3>
                 <div class="form-group toggle-switch">
-                    <input type="checkbox" id="url-scan-toggle" class="toggle-input" aria-label="Real-time URL Scanning">
+                    <input type="checkbox" id="url-scan-toggle" class="toggle-input" aria-label="Scan URLs">
                     <label for="url-scan-toggle" class="toggle-label"></label>
-                    <span>Real-time URL Scanning</span>
+                    <span>Scan URLs</span>
                 </div>
                 <div class="form-group toggle-switch">
-                    <input type="checkbox" id="email-scan-toggle" class="toggle-input" aria-label="Email Scanning (beta)">
+                    <input type="checkbox" id="email-scan-toggle" class="toggle-input" aria-label="Scan Emails">
                     <label for="email-scan-toggle" class="toggle-label"></label>
-                    <span>Email Scanning (beta)</span>
+                    <span>Scan Emails</span>
                 </div>
-
-                <hr class="divider">
-                <h3 class="settings-subtitle">Privacy Settings</h3>
                 <div class="form-group toggle-switch">
-                    <input type="checkbox" id="data-sharing-toggle" class="toggle-input">
+                    <input type="checkbox" id="data-sharing-toggle" class="toggle-input" aria-label="Allow data sharing for research">
                     <label for="data-sharing-toggle" class="toggle-label"></label>
-                    <span>Share data for model training</span>
+                    <span>Share Data for Research</span>
                 </div>
                 <div class="form-group toggle-switch">
-                    <input type="checkbox" id="auto-submit-toggle" class="toggle-input">
+                    <input type="checkbox" id="auto-submit-toggle" class="toggle-input" aria-label="Auto-submit threats">
                     <label for="auto-submit-toggle" class="toggle-label"></label>
-                    <span>Auto-submit suspicious samples</span>
+                    <span>Auto-submit Threats</span>
                 </div>
-                
-                <hr class="divider">
-                <h3 class="settings-subtitle">Notifications</h3>
                 <div class="form-group toggle-switch">
-                    <input type="checkbox" id="desktop-notify-toggle" class="toggle-input">
+                    <input type="checkbox" id="desktop-notify-toggle" class="toggle-input" aria-label="Desktop notifications">
                     <label for="desktop-notify-toggle" class="toggle-label"></label>
-                    <span>Enable desktop notifications</span>
+                    <span>Desktop Notifications</span>
                 </div>
-                <button id="test-notification-btn" class="btn btn-sm btn-secondary" style="margin-top: 10px;">Send Test Notification</button>
-                
-                <hr class="divider">
-                <a href="#" id="full-settings-link" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">View Full Account Settings</a>
+                <button id="test-notification-btn" class="btn btn-secondary" style="margin-top: 10px;">Test Notification</button>
             </div>
         </div>
     </div>
 
-    <div id="onboarding-modal" class="modal-container hidden" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
-        <div class="modal-backdrop"></div> <div class="modal-content card" role="document">
-            <header class="modal-header">
-                <h2 id="onboarding-title">Welcome to PhishNet!</h2>
-            </header>
-            <div class="modal-body">
-                <div id="onboarding-step-1" class="onboarding-step">
-                    <p>PhishNet protects you from malicious links and emails. To get started, you must **log in** to activate protection.</p>
-                </div>
-                <div id="onboarding-step-2" class="onboarding-step hidden">
-                    <p>Use the **"Always On"** toggle to keep protection active. If it's off, protection will auto-pause after 10 minutes to save resources.</p>
-                </div>
-                <div id="onboarding-step-3" class="onboarding-step hidden">
-                    <p>By default, PhishNet respects your privacy. You can **opt-in** to share anonymized scan data from the settings menu to help improve our AI model.</p>
-                </div>
-            </div>
-            <footer class="modal-footer" style="justify-content: space-between;">
-                <div class="form-group toggle-switch" style="margin-bottom: 0;">
-                    <input type="checkbox" id="dont-show-onboarding" class="toggle-input">
-                    <label for="dont-show-onboarding" class="toggle-label"></label>
-                    <span>Don't show again</span>
-                </div>
-                <button id="onboarding-next-btn" class="btn btn-primary">Next</button>
-            </footer>
-        </div>
+    <div id="toast-notification" class="toast-notification hidden">
+        <p id="toast-message"></p>
     </div>
-    
-    <div id="toast-notification" class="toast hidden" role="alert">
-        <p id="toast-message">PhishNet paused (auto-off).</p>
-    </div>
-
 
     <script src="popup.js"></script>
 </body>

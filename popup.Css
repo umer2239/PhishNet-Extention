@@ -1,24 +1,25 @@
-/* filename: popup.css - Styles for PhishNet Extension (Minimal Update) */
+/* filename: popup.css - PhishNet Extension (Blue/Black Theme) */
 
 /* ========================================================================= */
 /* 1. Imports and CSS Variables */
 /* ========================================================================= */
 
 :root {
-    /* Colors (Dark Theme) - Black & Red Focus */
+    /* Colors (Blue/Black Theme) - Matching Website */
     --color-safe: #00FF88;
-    --color-malicious: #FF4D4D;
+    --color-malicious: #0B63D9;
+    --color-accent: #00B7D9;
     --color-suspicious: #FFC107;
 
     --color-bg-primary: #0B0B0B;
-    --color-bg-secondary: #1A0000;
-    --color-card: #2A0000; /* Slightly lighter for cards */
+    --color-bg-secondary: #0f0f10;
+    --color-card: #0f0f10;
     --color-text-primary: #FFFFFF;
-    --color-text-secondary: #FF4D4D;
-    --color-border: #4A0000;
+    --color-text-secondary: #0B63D9;
+    --color-border: rgba(11, 99, 217, 0.3);
     
-    /* Primary Gradient (For Header/Hero) */
-    --gradient-header: linear-gradient(90deg, #2A0000 0%, #0B0B0B 100%);
+    /* Primary Gradient (Blue/Black) */
+    --gradient-header: linear-gradient(90deg, #0B0B0B 0%, #001a33 100%);
     
     /* Spacing and Dimensions */
     --space-xs: 4px;
@@ -30,7 +31,7 @@
     --radius-md: 8px;
     
     /* Typography */
-    --font-primary: 'Poppins', 'Inter', sans-serif;
+    --font-primary: 'Inter', 'Sora', sans-serif;
     
     /* Animations */
     --transition-speed: 0.3s;
@@ -49,11 +50,11 @@
 
 body {
     font-family: var(--font-primary);
-    background-color: var(--color-bg-primary);
+    background: var(--color-bg-primary);
     color: var(--color-text-primary);
     line-height: 1.6;
     width: 380px;
-    height: 600px; /* Fixed height */
+    height: 600px;
     max-height: 600px;
     overflow: hidden;
     display: flex;
@@ -64,9 +65,10 @@ body {
 h1, h2, h3 {
     color: var(--color-text-primary);
     font-weight: 600;
+    font-family: 'Inter', sans-serif;
 }
 
-h1.logo-text { font-size: 1.25rem; margin: 0; }
+h1.logo-text { font-size: 1.25rem; margin: 0; font-weight: 800; }
 h2 { font-size: 1.1rem; }
 h3 { font-size: 1rem; margin-bottom: var(--space-sm); }
 h3.settings-subtitle {
@@ -82,7 +84,7 @@ a {
     text-decoration: none;
     transition: opacity var(--transition-speed);
 }
-a:hover { opacity: 0.8; }
+a:hover { opacity: 0.8; color: var(--color-accent); }
 p { opacity: 0.9; }
 
 hr.divider {
@@ -134,7 +136,6 @@ hr.divider {
     gap: var(--space-sm);
 }
 
-/* Main content is now a flex container centered */
 .main-content {
     flex-grow: 1;
     padding: var(--space-lg);
@@ -145,7 +146,6 @@ hr.divider {
     gap: var(--space-lg);
 }
 
-/* Page navigation for main vs premium */
 .page-view {
     display: flex;
     flex-direction: column;
@@ -153,11 +153,9 @@ hr.divider {
 .page-view.hidden {
     display: none;
 }
-/* Center the main content page */
 #main-content.page-view {
-    justify-content: center; /* Center the button vertically */
+    justify-content: center;
 }
-
 
 .footer-container {
     padding: var(--space-md);
@@ -169,10 +167,10 @@ hr.divider {
 .legal-footer {
     font-size: 0.7rem;
     text-align: center;
-    color: #aaa;
+    color: #999;
 }
 .legal-footer a {
-    color: #ccc;
+    color: var(--color-accent);
     text-decoration: underline;
 }
 
@@ -190,15 +188,17 @@ hr.divider {
     transition: all var(--transition-speed);
     border: 2px solid transparent;
     font-size: 0.875rem;
+    font-family: var(--font-primary);
 }
 
 .btn-primary {
     background-color: var(--color-malicious);
-    color: var(--color-bg-primary);
-    box-shadow: 0 4px 10px rgba(255, 77, 77, 0.3);
+    color: var(--color-text-primary);
+    box-shadow: 0 0 20px rgba(11, 99, 217, 0.3);
 }
 .btn-primary:hover {
-    background-color: #ff6a6a;
+    background-color: #0a5cc0;
+    box-shadow: 0 0 30px rgba(11, 99, 217, 0.5);
     transform: translateY(-1px);
 }
 
@@ -229,7 +229,7 @@ hr.divider {
     justify-content: center;
 }
 .icon-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(11, 99, 217, 0.2);
 }
 
 .card {
@@ -237,6 +237,7 @@ hr.divider {
     padding: var(--space-lg);
     border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
+    box-shadow: 0 0 20px rgba(11, 99, 217, 0.15);
 }
 
 .form-group {
@@ -257,6 +258,12 @@ input[type="text"], textarea {
     background-color: var(--color-bg-primary);
     color: var(--color-text-primary);
     font-family: var(--font-primary);
+    transition: border var(--transition-speed);
+}
+input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: var(--color-text-secondary);
+    box-shadow: 0 0 10px rgba(11, 99, 217, 0.3);
 }
 textarea { resize: vertical; }
 
@@ -310,13 +317,14 @@ textarea { resize: vertical; }
 }
 .item-list li:last-child { border-bottom: none; }
 .item-list .remove-btn {
-    color: var(--color-malicious);
+    color: var(--color-accent);
     font-size: 1.2rem;
     padding: 0 4px;
+    cursor: pointer;
 }
 
 /* ========================================================================= */
-/* 5. Main UI Components (MINIMAL UPDATE) */
+/* 5. Main UI Components */
 /* ========================================================================= */
 
 .user-info { display: none; }
@@ -326,29 +334,29 @@ textarea { resize: vertical; }
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: var(--color-text-secondary);
-    color: var(--color-bg-primary);
+    background: linear-gradient(135deg, rgba(11, 99, 217, 0.3), rgba(0, 183, 217, 0.1));
+    border: 1px solid var(--color-text-secondary);
+    color: var(--color-text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 #username-display { font-size: 0.85rem; font-weight: 600; }
 
-/* Main Protection Dial (MINIMAL) */
+/* Main Protection Dial */
 .protection-dial-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--space-md); /* Increased gap */
+    gap: var(--space-md);
 }
 .protection-dial {
-    width: 160px; /* Larger */
+    width: 160px;
     height: 160px;
     border-radius: 50%;
     border: 2px solid var(--color-border);
-    /* Flat, clean background */
     background-color: var(--color-card);
-    color: #aaa; /* OFF state color */
+    color: #666;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -369,17 +377,15 @@ textarea { resize: vertical; }
     margin-top: var(--space-xs);
 }
 
-/* Active (ON) State (MINIMAL) */
+/* Active (ON) State */
 .protection-dial.is-active {
-    /* Flat, clean red */
-    background-color: var(--color-malicious);
+    background: linear-gradient(135deg, rgba(11, 99, 217, 0.2), rgba(0, 183, 217, 0.1));
     border-color: var(--color-malicious);
     color: var(--color-text-primary);
-    /* Subtle glow */
-    box-shadow: 0 0 20px rgba(255, 77, 77, 0.5);
+    box-shadow: 0 0 30px rgba(11, 99, 217, 0.5), 0 0 60px rgba(0, 183, 217, 0.2);
 }
 .protection-dial.is-active:hover {
-    background-color: #ff6a6a;
+    box-shadow: 0 0 40px rgba(11, 99, 217, 0.7), 0 0 80px rgba(0, 183, 217, 0.3);
 }
 
 .timer-display {
@@ -391,7 +397,6 @@ textarea { resize: vertical; }
 }
 .timer-display.is-visible { opacity: 1; }
 
-/* "Always On" toggle now lives outside a card */
 .controls-container-minimal {
     display: flex;
     justify-content: center;
@@ -407,7 +412,7 @@ textarea { resize: vertical; }
 
 .modal-container,
 .drawer-container {
-    position: absolute; /* NOT fixed */
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
@@ -497,154 +502,145 @@ textarea { resize: vertical; }
 .menu-list li a,
 .menu-list li button {
     display: block;
-    padding: var(--space-sm);
-    color: var(--color-text-primary);
-    border-radius: var(--radius-sm);
-    transition: background-color var(--transition-speed);
-    background: none;
-    border: none;
-    font-family: var(--font-primary);
-    font-size: 1rem;
     width: 100%;
+    padding: var(--space-sm);
+    border: none;
+    background: transparent;
+    color: var(--color-text-primary);
     text-align: left;
     cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-speed);
+    font-family: var(--font-primary);
 }
 .menu-list li a:hover,
 .menu-list li button:hover {
-    background-color: rgba(255, 77, 77, 0.1);
-    color: var(--color-text-secondary);
+    background: rgba(11, 99, 217, 0.2);
+    color: var(--color-accent);
 }
-
-.onboarding-step { margin-bottom: var(--space-md); }
-
-.toast {
-    position: absolute;
-    bottom: var(--space-lg);
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: var(--color-text-secondary);
-    color: var(--color-bg-primary);
-    padding: var(--space-sm) var(--space-md);
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    z-index: 200;
-    opacity: 0;
-    transition: opacity var(--transition-speed);
-}
-.toast:not(.hidden) { opacity: 1; }
 
 /* ========================================================================= */
-/* 7. NEW: Page Navigation & Premium Styles */
+/* 7. Premium & Pricing Cards */
 /* ========================================================================= */
 
 .page-header {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
-    margin-bottom: var(--space-md);
-    flex-shrink: 0;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
 }
-.page-header .icon-btn {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-}
-.page-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin: 0;
-}
+.page-title { margin: 0; }
 
 .pricing-grid {
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
 }
 
 .pricing-card {
-    background-color: var(--color-card);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    padding: var(--space-md);
-    border-left-width: 4px;
+    padding: var(--space-lg);
+    background: linear-gradient(135deg, rgba(11, 99, 217, 0.1), rgba(0, 183, 217, 0.05));
     position: relative;
-    overflow: hidden;
 }
 
-.pricing-card h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin: 0;
+.pricing-card.annual {
+    border-color: var(--color-malicious);
+    box-shadow: 0 0 20px rgba(11, 99, 217, 0.2);
 }
-
-.pricing-card .price {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text-primary);
-    margin: var(--space-xs) 0;
-}
-.pricing-card .price .price-per {
-    font-size: 0.875rem;
-    font-weight: 400;
-    color: #aaa;
-}
-
-.pricing-card .features-list {
-    list-style: none;
-    margin: var(--space-md) 0;
-    padding-left: var(--space-sm);
-}
-.features-list li {
-    font-size: 0.875rem;
-    color: #ccc;
-    position: relative;
-    padding-left: var(--space-md);
-    margin-bottom: var(--space-xs);
-}
-.features-list li::before {
-    content: '✓';
-    position: absolute;
-    left: 0;
-    font-weight: 600;
-}
-
-/* Plan-specific colors */
-.pricing-card.free { border-left-color: var(--color-safe); }
-.pricing-card.free .features-list li::before { color: var(--color-safe); }
-
-.pricing-card.monthly { border-left-color: var(--color-suspicious); }
-.pricing-card.monthly .features-list li::before { color: var(--color-suspicious); }
-
-.pricing-card.annual { border-left-color: var(--color-malicious); }
-.pricing-card.annual .features-list li::before { color: var(--color-malicious); }
-
-.pricing-card .btn { width: 100%; }
 
 .best-value-badge {
     position: absolute;
-    top: -1px;
-    right: -1px;
-    background-color: var(--color-malicious);
-    color: var(--color-bg-primary);
-    font-size: 0.7rem;
+    top: -10px;
+    right: 15px;
+    background: var(--color-malicious);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
     font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 0 0 0 var(--radius-md);
 }
 
+.pricing-card h3 { margin-bottom: 0.5rem; }
+.price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    margin-bottom: 1rem;
+}
+.price-per {
+    font-size: 0.9rem;
+    color: var(--color-text-primary);
+    opacity: 0.7;
+}
+
+.features-list {
+    list-style: none;
+    margin-bottom: var(--space-md);
+}
+.features-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    opacity: 0.9;
+}
+.features-list li:last-child { border-bottom: none; }
+
+.pricing-card button {
+    width: 100%;
+}
+.pricing-card button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
 /* ========================================================================= */
-/* 8. Reduced Motion */
+/* 8. Toast Notification */
 /* ========================================================================= */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+
+.toast-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--color-malicious);
+    color: white;
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 12px rgba(11, 99, 217, 0.3);
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+}
+.toast-notification.hidden {
+    display: none;
+}
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
     }
-    .btn-cta {
-        animation: none;
+    to {
+        transform: translateX(0);
+        opacity: 1;
     }
+}
+
+/* ========================================================================= */
+/* 9. Scrollbar Styling */
+/* ========================================================================= */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(11, 99, 217, 0.3);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(11, 99, 217, 0.5);
 }

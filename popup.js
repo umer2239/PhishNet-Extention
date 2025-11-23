@@ -1,9 +1,9 @@
-/* filename: popup.js - Logic for PhishNet Extension Popup (Minimal Update) */
+/* filename: popup.js - Logic for PhishNet Extension Popup (Blue/Black Theme) */
 
 document.addEventListener('DOMContentLoaded', () => {
 
     // =====================================================================
-    // 1. Element Selectors (SIMPLIFIED)
+    // 1. Element Selectors
     // =====================================================================
     const body = document.body;
     const mainToggleBtn = document.getElementById('main-toggle-btn');
@@ -12,10 +12,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const alwaysOnToggle = document.getElementById('always-on-toggle');
     
     // Auth Elements
-    const loginLinkHeader = document.getElementById('login-link-header');
+    const loginBtnHeader = document.getElementById('login-btn-header');
     const signupLinkHeader = document.getElementById('signup-link-header');
     const usernameDisplay = document.getElementById('username-display');
     const logoutBtnDemo = document.getElementById('logout-btn-demo');
+    const loginModal = document.getElementById('login-modal');
+    const loginSubmitBtn = document.getElementById('login-submit-btn');
+    const loginEmail = document.getElementById('login-email');
+    const loginPassword = document.getElementById('login-password');
+    const loginFromGatingBtn = document.getElementById('login-from-gating-btn');
 
     // Modals & Drawers
     const menuToggleBtn = document.getElementById('menu-toggle-btn');
@@ -24,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const whitelistModal = document.getElementById('whitelist-modal');
     const bulkScanModal = document.getElementById('bulk-scan-modal');
     const settingsModal = document.getElementById('settings-modal');
-    const onboardingModal = document.getElementById('onboarding-modal');
     const toastNotification = document.getElementById('toast-notification');
     const submitEmailModal = document.getElementById('submit-email-modal');
 
@@ -34,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const allPages = document.querySelectorAll('.page-view');
     const premiumLink = document.getElementById('premium-link');
     const premiumBackBtn = document.getElementById('premium-back-btn');
-    const viewLastReportBtn = document.getElementById('view-last-report-btn'); // In menu
+    const viewLastReportBtn = document.getElementById('view-last-report-btn');
 
     // Menu Buttons
     const menuWhitelistBtn = document.getElementById('menu-whitelist-btn');
@@ -56,18 +60,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const emailSubmitBtn = document.getElementById('email-submit-btn');
 
     // Settings Elements
-    const urlScanToggle = document.getElementById('url-scan-toggle'); // Moved
-    const emailScanToggle = document.getElementById('email-scan-toggle'); // Moved
+    const urlScanToggle = document.getElementById('url-scan-toggle');
+    const emailScanToggle = document.getElementById('email-scan-toggle');
     const dataSharingToggle = document.getElementById('data-sharing-toggle');
     const autoSubmitToggle = document.getElementById('auto-submit-toggle');
     const desktopNotifyToggle = document.getElementById('desktop-notify-toggle');
     const testNotificationBtn = document.getElementById('test-notification-btn');
 
-    // Onboarding Elements
-    const onboardingNextBtn = document.getElementById('onboarding-next-btn');
-    const dontShowOnboarding = document.getElementById('dont-show-onboarding');
-    
-    // Legal Links (Demo URLs)
+    // Legal Links
     const termsLink = document.getElementById('terms-link');
     const privacyLink = document.getElementById('privacy-link');
 
@@ -75,11 +75,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalCloseTriggers = document.querySelectorAll('[data-close-modal]');
 
     // =====================================================================
-    // 2. State Management (Demo using localStorage)
+    // 2. State Management
     // =====================================================================
     
-    const DEMO_API_URL = 'https://phishnet.example.com/api/v1';
-
     const defaultState = {
         isLoggedIn: false,
         isProtected: false,
@@ -95,12 +93,19 @@ document.addEventListener('DOMContentLoaded', () => {
             desktopNotify: true,
         },
         user: {
-            username: "demo@user.com"
+            username: "demo@phishnet.com",
+            name: "Demo User"
         }
     };
 
     let state = {};
     let timerInterval = null;
+
+    // Demo credentials
+    const DEMO_CREDENTIALS = {
+        email: 'demo@phishnet.com',
+        password: 'Demo123!'
+    };
 
     function loadState() {
         try {
@@ -116,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUI();
         
         if (state.isProtected && !state.alwaysOn && state.timerEndTime > Date.now()) {
-            startTimer(true); // Resume timer
+            startTimer(true);
         } else if (state.isProtected && !state.alwaysOn && state.timerEndTime <= Date.now()) {
             state.isProtected = false;
             state.timerEndTime = 0;
@@ -131,27 +136,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             console.error("Failed to save state to localStorage:", e);
         }
-        
-        // PRODUCTION: Persist preferences to backend
-        /*
-        const payload = {
-            alwaysOn: state.alwaysOn,
-            scanURLs: state.scanURLs,
-            scanEmails: state.scanEmails,
-            preferences: state.preferences
-        };
-        fetch(`${DEMO_API_URL}/user/preferences`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ...' },
-            body: JSON.stringify(payload)
-        }).catch(console.error);
-        */
     }
     
     function updateUI() {
         body.classList.toggle('logged-in', state.isLoggedIn);
         if (state.isLoggedIn) {
-            usernameDisplay.textContent = state.user.username;
+            usernameDisplay.textContent = state.user.name || state.user.username;
         }
         mainToggleBtn.classList.toggle('is-active', state.isProtected);
         mainToggleBtn.setAttribute('aria-checked', state.isProtected);
@@ -159,18 +149,66 @@ document.addEventListener('DOMContentLoaded', () => {
         timerDisplay.classList.toggle('is-visible', state.isProtected && !state.alwaysOn);
         alwaysOnToggle.checked = state.alwaysOn;
         
-        // Update toggles inside settings modal
-        urlScanToggle.checked = state.scanURLs;
-        emailScanToggle.checked = state.scanEmails;
-        dataSharingToggle.checked = state.preferences.dataSharing;
-        autoSubmitToggle.checked = state.preferences.autoSubmit;
-        desktopNotifyToggle.checked = state.preferences.desktopNotify;
+        if (urlScanToggle) urlScanToggle.checked = state.scanURLs;
+        if (emailScanToggle) emailScanToggle.checked = state.scanEmails;
+        if (dataSharingToggle) dataSharingToggle.checked = state.preferences.dataSharing;
+        if (autoSubmitToggle) autoSubmitToggle.checked = state.preferences.autoSubmit;
+        if (desktopNotifyToggle) desktopNotifyToggle.checked = state.preferences.desktopNotify;
         
         renderWhitelist();
     }
 
     // =====================================================================
-    // 3. Core Functionality (Protection Toggle & Timer)
+    // 3. Authentication (Demo Login)
+    // =====================================================================
+
+    loginBtnHeader.addEventListener('click', () => {
+        openModal('login-modal');
+    });
+
+    loginSubmitBtn.addEventListener('click', () => {
+        const email = loginEmail.value.trim();
+        const password = loginPassword.value.trim();
+
+        if (email === DEMO_CREDENTIALS.email && password === DEMO_CREDENTIALS.password) {
+            state.isLoggedIn = true;
+            state.user = {
+                username: DEMO_CREDENTIALS.email,
+                name: 'Demo User'
+            };
+            saveState();
+            updateUI();
+            closeModal('login-modal');
+            showToast('Welcome back, Demo User! 🎉');
+        } else {
+            showToast('Invalid credentials. Use demo@phishnet.com / Demo123!');
+        }
+    });
+
+    loginFromGatingBtn.addEventListener('click', () => {
+        closeModal('login-gating-modal');
+        openModal('login-modal');
+    });
+
+    logoutBtnDemo.addEventListener('click', () => {
+        state.isLoggedIn = false;
+        state.isProtected = false;
+        stopTimer();
+        saveState();
+        updateUI();
+        closeModal('menu-drawer');
+        showToast('Logged out successfully');
+    });
+
+    // Allow Enter key in login form
+    loginPassword.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            loginSubmitBtn.click();
+        }
+    });
+
+    // =====================================================================
+    // 4. Core Functionality (Protection Toggle & Timer)
     // =====================================================================
 
     mainToggleBtn.addEventListener('click', () => {
@@ -199,11 +237,10 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUI();
     });
     
-    // --- Timer Functions ---
     function startTimer(resume = false) {
         stopTimer(); 
         if (!resume) {
-            state.timerEndTime = Date.now() + (10 * 60 * 1000); // 10 minutes
+            state.timerEndTime = Date.now() + (10 * 60 * 1000);
         }
         timerInterval = setInterval(updateTimerDisplay, 1000);
         updateTimerDisplay();
@@ -239,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showToast(message) {
         const toastMessage = document.getElementById('toast-message');
-        toastMessage.textContent = message;
+        if (toastMessage) toastMessage.textContent = message;
         toastNotification.classList.remove('hidden');
         setTimeout(() => {
             toastNotification.classList.add('hidden');
@@ -247,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =====================================================================
-    // 4. Page & Modal Management
+    // 5. Page & Modal Management
     // =====================================================================
     
     function showPage(pageId) {
@@ -299,7 +336,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // --- Menu Navigation ---
     menuToggleBtn.addEventListener('click', () => {
         showPage('main-content');
         openModal('menu-drawer');
@@ -332,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
         closeModal('menu-drawer');
         openModal('submit-email-modal');
     });
-    
+
     menuSettingsBtn.addEventListener('click', () => {
         showPage('main-content');
         closeModal('menu-drawer');
@@ -340,164 +376,110 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =====================================================================
-    // 5. Auth & Onboarding (Demo)
+    // 6. Whitelist Management
     // =====================================================================
 
-    logoutBtnDemo.addEventListener('click', () => {
-        state.isLoggedIn = false;
-        state.isProtected = false;
-        stopTimer();
-        saveState();
-        updateUI();
-        closeModal('menu-drawer');
-    });
-
-    loginLinkHeader.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (!state.isLoggedIn) {
-            state.isLoggedIn = true;
-            state.user.username = "demo@user.com";
-            saveState();
-            updateUI();
-        }
-    });
-
-    if (state.firstRun) {
-        openModal('onboarding-modal');
-        let currentStep = 1;
-        const totalSteps = 3;
-        
-        onboardingNextBtn.addEventListener('click', () => {
-            document.getElementById(`onboarding-step-${currentStep}`).classList.add('hidden');
-            currentStep++;
-            if (currentStep > totalSteps) {
-                state.firstRun = !dontShowOnboarding.checked;
-                saveState();
-                closeModal('onboarding-modal');
-            } else {
-                document.getElementById(`onboarding-step-${currentStep}`).classList.remove('hidden');
-                if (currentStep === totalSteps) {
-                    onboardingNextBtn.textContent = "Finish";
-                }
-            }
-        });
-    }
-
-    // =====================================================================
-    // 6. Feature Implementation (Whitelist, Bulk Scan, Settings, etc.)
-    // =====================================================================
-
-    // --- Whitelist ---
-    function renderWhitelist() {
-        whitelistList.innerHTML = '';
-        if (state.whitelist.length === 0) {
-            whitelistList.innerHTML = '<li class="empty-list-item">No domains whitelisted.</li>';
-        }
-        state.whitelist.forEach((domain, index) => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <span>${domain}</span>
-                <button class="icon-btn remove-btn" data-index="${index}" aria-label="Remove ${domain} from whitelist">&times;</button>
-            `;
-            whitelistList.appendChild(li);
-        });
-    }
     whitelistAddBtn.addEventListener('click', () => {
         const domain = whitelistInput.value.trim();
         if (domain && !state.whitelist.includes(domain)) {
             state.whitelist.push(domain);
-            saveState();
-            renderWhitelist();
             whitelistInput.value = '';
-        }
-    });
-    whitelistList.addEventListener('click', (e) => {
-        if (e.target.classList.contains('remove-btn')) {
-            const index = parseInt(e.target.dataset.index, 10);
-            state.whitelist.splice(index, 1);
             saveState();
             renderWhitelist();
+            showToast(`${domain} added to whitelist`);
         }
     });
 
-    // --- Bulk Scan ---
+    function renderWhitelist() {
+        whitelistList.innerHTML = state.whitelist.map((domain, idx) => `
+            <li>
+                <span>${domain}</span>
+                <button class="remove-btn" onclick="removeWhitelistItem(${idx})" aria-label="Remove ${domain}">×</button>
+            </li>
+        `).join('');
+    }
+
+    window.removeWhitelistItem = (idx) => {
+        state.whitelist.splice(idx, 1);
+        saveState();
+        renderWhitelist();
+        showToast("Domain removed from whitelist");
+    };
+
+    // =====================================================================
+    // 7. Bulk Scan
+    // =====================================================================
+
     bulkScanSubmit.addEventListener('click', () => {
-        const urls = bulkUrlsInput.value.trim().split('\n').filter(Boolean);
+        const urls = bulkUrlsInput.value.split('\n').filter(u => u.trim());
         if (urls.length > 0) {
-            showToast(`Queued ${urls.length} URLs for scanning.`);
-            console.log("Queued URLs:", urls);
+            showToast(`Queued ${urls.length} URLs for scanning`);
             bulkUrlsInput.value = '';
             closeModal('bulk-scan-modal');
         }
     });
 
-    // --- Submit Email ---
+    // =====================================================================
+    // 8. Email Submit
+    // =====================================================================
+
     emailSubmitBtn.addEventListener('click', () => {
-        const emailContent = emailContentInput.value.trim();
-        if (emailContent) {
-            showToast(`Threat submitted for analysis.`);
-            console.log("Submitted Content:", emailContent);
+        const content = emailContentInput.value.trim();
+        if (content) {
+            showToast("Threat report submitted for analysis");
             emailContentInput.value = '';
             closeModal('submit-email-modal');
         }
     });
 
-    // --- In-Popup Settings Toggles ---
-    urlScanToggle.addEventListener('change', () => {
-        state.scanURLs = urlScanToggle.checked;
-        saveState();
-    });
-
-    emailScanToggle.addEventListener('change', () => {
-        state.scanEmails = emailScanToggle.checked;
-        saveState();
-    });
-    dataSharingToggle.addEventListener('change', () => {
-        state.preferences.dataSharing = dataSharingToggle.checked;
-        saveState();
-    });
-    autoSubmitToggle.addEventListener('change', () => {
-        state.preferences.autoSubmit = autoSubmitToggle.checked;
-        saveState();
-    });
-    desktopNotifyToggle.addEventListener('change', () => {
-        state.preferences.desktopNotify = desktopNotifyToggle.checked;
-        saveState();
-        if(state.preferences.desktopNotify) {
-            Notification.requestPermission();
-        }
-    });
-
-    // --- Desktop Notification Demo ---
-    testNotificationBtn.addEventListener('click', () => {
-        const notificationTitle = "PhishNet Test";
-        const notificationOptions = {
-            body: "This is a test notification. PhishNet is working!",
-            icon: "icons/icon-128.png"
-        };
-        if (!("Notification"in window)) {
-            alert("This browser does not support desktop notification");
-        } else if (Notification.permission === "granted") {
-            new Notification(notificationTitle, notificationOptions);
-        } else if (Notification.permission !== "denied") {
-            Notification.requestPermission().then((permission) => {
-                if (permission === "granted") {
-                    new Notification(notificationTitle, notificationOptions);
-                }
-            });
-        }
-    });
-    
-    // --- Set Demo Links ---
-    const DEMO_URL = 'about:blank';
-    loginLinkHeader.href = `${DEMO_URL}?action=login`;
-    signupLinkHeader.href = `${DEMO_URL}?action=signup`;
-    termsLink.href = `${DEMO_URL}?page=terms`;
-    privacyLink.href = `${DEMO_URL}?page=privacy`;
-    viewLastReportBtn.href = `${DEMO_URL}?page=reports`;
-    
     // =====================================================================
-    // 8. Initial Load
+    // 9. Settings
     // =====================================================================
+
+    if (urlScanToggle) {
+        urlScanToggle.addEventListener('change', () => {
+            state.scanURLs = urlScanToggle.checked;
+            saveState();
+        });
+    }
+
+    if (emailScanToggle) {
+        emailScanToggle.addEventListener('change', () => {
+            state.scanEmails = emailScanToggle.checked;
+            saveState();
+        });
+    }
+
+    if (dataSharingToggle) {
+        dataSharingToggle.addEventListener('change', () => {
+            state.preferences.dataSharing = dataSharingToggle.checked;
+            saveState();
+        });
+    }
+
+    if (autoSubmitToggle) {
+        autoSubmitToggle.addEventListener('change', () => {
+            state.preferences.autoSubmit = autoSubmitToggle.checked;
+            saveState();
+        });
+    }
+
+    if (desktopNotifyToggle) {
+        desktopNotifyToggle.addEventListener('change', () => {
+            state.preferences.desktopNotify = desktopNotifyToggle.checked;
+            saveState();
+        });
+    }
+
+    if (testNotificationBtn) {
+        testNotificationBtn.addEventListener('click', () => {
+            showToast("Test notification - Extension is working!");
+        });
+    }
+
+    // =====================================================================
+    // 10. Initialize
+    // =====================================================================
+
     loadState();
 });
