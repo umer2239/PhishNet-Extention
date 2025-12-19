@@ -6,291 +6,371 @@
     <title>PhishNet Protection</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-
-    <header class="header-container">
-        <div class="header-left">
-            <button id="menu-toggle-btn" class="icon-btn" aria-label="Open menu" aria-controls="menu-drawer">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"></path></svg>
-            </button>
-            <h1 class="logo-text">PhishNet</h1>
-        </div>
-        <div class="header-right">
-            <div class="auth-buttons">
-                <button id="login-btn-header" class="btn btn-sm btn-secondary">Demo Login</button>
-                <a href="#" id="signup-link-header" class="btn btn-sm btn-primary" target="_blank" rel="noopener noreferrer">Sign Up</a>
+    <!-- INTRO PAGE -->
+    <div id="intro-page" class="page active">
+        <div class="cyber-bg">
+            <div class="cyber-grid"></div>
+            <div class="cyber-orbs">
+                <div class="orb orb-1"></div>
+                <div class="orb orb-2"></div>
+                <div class="orb orb-3"></div>
             </div>
-            <div class="user-info">
-                <span id="username-display">Demo User</span>
-                <div class="user-avatar" aria-label="User Avatar">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 2a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5zm0 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3zm6 11a1 1 0 0 1-2 0v-2a3 3 0 0 0-3-3H9a3 3 0 0 0-3 3v2a1 1 0 0 1-2 0v-2a5 5 0 0 1 5-5h6a5 5 0 0 1 5 5v2z"></path></svg>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main id="main-content" class="main-content page-view">
-        <section class="protection-dial-container">
-            <button id="main-toggle-btn" class="protection-dial" role="switch" aria-checked="false" aria-label="Toggle PhishNet Protection">
-                <div class="dial-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="64" height="64"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm0 2.09L18 6.09v5c0 4.07-2.92 7.9-6 8.91-3.08-1.01-6-4.84-6-8.91v-5L12 4.09z"></path></svg>
-                </div>
-                <span class="dial-status-text">OFF</span>
-            </button>
-            <p id="timer-display" class="timer-display">10:00</p>
-        </section>
-
-        <section class="controls-container-minimal">
-             <div class="form-group toggle-switch">
-                <input type="checkbox" id="always-on-toggle" class="toggle-input" aria-label="Keep extension always on">
-                <label for="always-on-toggle" class="toggle-label"></label>
-                <span>Keep extension always ON</span>
-            </div>
-        </section>
-    </main>
-    
-    <section id="premium-page" class="main-content page-view hidden">
-        <div class="page-header">
-            <button id="premium-back-btn" class="icon-btn" aria-label="Go back to main screen">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M10.828 12l4.95 4.95-1.414 1.414L8 12l6.364-6.364 1.414 1.414z"></path></svg>
-            </button>
-            <h2 class="page-title">PhishNet Premium</h2>
+            <div class="cyber-lines"></div>
         </div>
         
-        <div class="pricing-grid">
-            <div class="pricing-card free">
-                <h3>Free Plan</h3>
-                <p class="price">Current Plan</p>
-                <ul class="features-list">
-                    <li>Standard Phishing Detection</li>
-                    <li>Email & URL Scanning</li>
-                    <li>Community Support</li>
-                </ul>
-                <button class="btn btn-secondary" disabled>Active</button>
+        <header class="header">
+            <div class="header-left">
+                <h1 class="logo">PhishNet</h1>
             </div>
-            
-            <div class="pricing-card monthly">
-                <h3>Monthly</h3>
-                <p class="price">$4.99 <span class="price-per">/ month</span></p>
-                <ul class="features-list">
-                    <li>Advanced AI Detection Engine</li>
-                    <li>Real-time Header Analysis</li>
-                    <li>Priority Support</li>
-                </ul>
-                <button class="btn btn-secondary">Get Monthly</button>
+            <div class="header-right">
+                <button id="intro-login-btn" class="btn btn-secondary btn-sm">Demo Login</button>
+                <button id="intro-signup-btn" class="btn btn-primary btn-sm">Sign Up</button>
             </div>
-            
-            <div class="pricing-card annual">
-                <span class="best-value-badge">Best Value</span>
-                <h3>Annual</h3>
-                <p class="price">$49.99 <span class="price-per">/ year</span></p>
-                <ul class="features-list">
-                    <li>All Monthly Features</li>
-                    <li>Advanced AI Detection Engine</li>
-                    <li>Priority Support</li>
-                </ul>
-                <button class="btn btn-primary">Save 20%</button>
-            </div>
-        </div>
-    </section>
+        </header>
 
-    <footer class="footer-container">
-        <p class="legal-footer">
-            By using the extension you agree with
-            <a href="#" id="terms-link" target="_blank" rel="noopener noreferrer">Terms and Conditions</a> and
-            <a href="#" id="privacy-link" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
-        </p>
-    </footer>
-
-    <div id="login-modal" class="modal-container hidden" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
-        <div class="modal-backdrop" data-close-modal></div>
-        <div class="modal-content card" role="document">
-            <header class="modal-header">
-                <h2 id="login-modal-title">PhishNet Login</h2>
-                <button class="icon-btn" data-close-modal aria-label="Close modal">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
-                </button>
-            </header>
-            <div class="modal-body">
-                <div class="form-group" style="flex-direction: column; align-items: flex-start;">
-                    <label for="login-email" style="margin-bottom: 0.5rem;">Email</label>
-                    <input type="email" id="login-email" placeholder="demo@phishnet.com" value="demo@phishnet.com">
-                </div>
-                <div class="form-group" style="flex-direction: column; align-items: flex-start;">
-                    <label for="login-password" style="margin-bottom: 0.5rem;">Password</label>
-                    <input type="password" id="login-password" placeholder="Demo123!" value="Demo123!">
-                </div>
-                <p style="font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 1rem;">
-                    Demo credentials pre-filled. Click Login to continue.
-                </p>
-                <button id="login-submit-btn" class="btn btn-primary" style="width: 100%;">Login</button>
-                <hr class="divider">
-                <p style="text-align: center; font-size: 0.85rem; color: var(--color-text-secondary);">
-                    Demo account for testing. All data is local.
-                </p>
+        <main class="intro-main">
+            <div class="phishnet-title-container">
+                <div class="phishnet-title">PhishNet</div>
             </div>
-        </div>
+            <div class="tagline" id="tagline"></div>
+        </main>
+
+        <footer class="intro-footer">
+            <p>By using the extension you agree with <a href="#">Terms and Conditions</a> and <a href="#">Privacy Policy</a></p>
+        </footer>
     </div>
 
-    <div id="menu-drawer" class="drawer-container hidden" role="dialog" aria-modal="true" aria-labelledby="menu-title">
-        <div class="drawer-backdrop" data-close-modal></div>
-        <nav class="drawer-content" id="menu-content">
+    <!-- DASHBOARD PAGE -->
+    <div id="dashboard-page" class="page">
+        <header class="header">
+            <div class="header-left">
+                <button id="menu-toggle-btn" class="icon-btn" title="Open Menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"></path></svg>
+                </button>
+                <h1 class="logo">PhishNet</h1>
+            </div>
+            <div class="header-right">
+                <span id="username-display" class="username"></span>
+                <div class="user-avatar"></div>
+            </div>
+        </header>
+
+        <main class="dashboard-main">
+            <div class="protection-container">
+                <button id="protection-dial" class="protection-dial" role="switch" aria-checked="false" aria-label="Toggle PhishNet Protection">
+                    <div class="dial-logo">PHISHNET</div>
+                    <span class="dial-status" id="dial-status">OFF</span>
+                </button>
+                <p class="timer-display" id="timer-display">10:00</p>
+            </div>
+
+            <div class="controls-section">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="always-on-toggle">
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">Keep extension always ON</span>
+                </label>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>By using the extension you agree with <a href="#">Terms and Conditions</a> and <a href="#">Privacy Policy</a></p>
+        </footer>
+    </div>
+
+    <!-- MENU DRAWER -->
+    <div id="menu-drawer" class="drawer">
+        <div class="drawer-backdrop"></div>
+        <nav class="drawer-content">
             <header class="drawer-header">
-                <h2 id="menu-title">Menu</h2>
-                <button class="icon-btn" data-close-modal aria-label="Close menu">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
+                <h2>Menu</h2>
+                <button class="icon-btn close-drawer" title="Close Menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
                 </button>
             </header>
-            <div class="drawer-body">
-                <ul class="menu-list user-info">
-                    <li><a href="#" id="dashboard-link" target="_blank" rel="noopener noreferrer">My Dashboard</a></li>
-                </ul>
-                
-                <hr class="divider">
-                
-                <ul class="menu-list">
-                    <li><a href="#" id="view-last-report-btn" target="_blank" rel="noopener noreferrer">View Reports</a></li>
-                    <li><button id="menu-submit-email-btn">Report a Threat</button></li>
-                    <li><button id="menu-bulk-scan-btn">Bulk Scan URLs</button></li>
-                </ul>
-                
-                <hr class="divider">
-
-                <ul class="menu-list">
-                    <li><button id="menu-whitelist-btn">Manage Whitelist</button></li>
-                    <li><button id="menu-settings-btn">Extension Settings</button></li>
-                    <li><a href="#" id="premium-link" rel="noopener noreferrer">Get Premium</a></li>
-                    <li><a href="#" id="help-link" target="_blank" rel="noopener noreferrer">Help & Support</a></li>
-                    <li class="user-info"><button id="logout-btn-demo">Log Out</button></li>
-                </ul>
-            </div>
+            <ul class="menu-list">
+                <li><button class="menu-btn menu-dashboard" data-action="dashboard">📊 Dashboard</button></li>
+                <li><hr></li>
+                <li><a href="#" class="menu-link">📈 View Reports</a></li>
+                <li><button class="menu-btn" data-action="report-threat">⚠️ Report a Threat</button></li>
+                <li><button class="menu-btn" data-action="bulk-scan">🔍 Bulk Scan URLs</button></li>
+                <li><hr></li>
+                <li><button class="menu-btn" data-action="whitelist">🔒 Manage Whitelist</button></li>
+                <li><button class="menu-btn" data-action="settings">⚙️ Extension Settings</button></li>
+                <li><button class="menu-btn" data-action="premium">👑 Get Premium</button></li>
+                <li><a href="#" class="menu-link">❓ Help & Support</a></li>
+                <li><hr></li>
+                <li><button class="menu-btn logout" data-action="logout">🚪 Log Out</button></li>
+            </ul>
         </nav>
     </div>
 
-    <div id="login-gating-modal" class="modal-container hidden" role="dialog" aria-modal="true" aria-labelledby="login-gating-title">
-        <div class="modal-backdrop" data-close-modal></div>
-        <div class="modal-content card" role="document">
+    <!-- LOGIN MODAL -->
+    <div id="login-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content card">
             <header class="modal-header">
-                <h2 id="login-gating-title">Protection Locked</h2>
-                <button class="icon-btn" data-close-modal aria-label="Close modal">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
+                <h2>PhishNet Login</h2>
+                <button class="icon-btn close-modal" title="Close Modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
                 </button>
             </header>
             <div class="modal-body">
-                <p>Please log in to activate PhishNet protection.</p>
-                <div class="action-buttons" style="margin-top: 20px; display: flex; gap: 10px;">
-                    <button id="login-from-gating-btn" class="btn btn-primary" style="flex: 1;">Demo Login</button>
-                    <a href="#" id="signup-from-gating-btn" class="btn btn-secondary" target="_blank" rel="noopener noreferrer" style="flex: 1; display: block;">Sign Up</a>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="demo@phishnet.com" value="demo@phishnet.com">
                 </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Demo123!" value="Demo123!">
+                </div>
+                <p class="form-hint">Demo credentials pre-filled. Click Login to continue.</p>
+                <button id="login-submit" class="btn btn-primary full-width">Login</button>
+                <hr class="divider">
+                <p class="form-hint">Demo account for testing. All data is local.</p>
             </div>
         </div>
     </div>
 
-    <div id="whitelist-modal" class="modal-container hidden" role="dialog" aria-modal="true" aria-labelledby="whitelist-modal-title">
-        <div class="modal-backdrop" data-close-modal></div>
-        <div class="modal-content card" role="document">
+    <!-- WHITELIST MODAL -->
+    <div id="whitelist-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content card">
             <header class="modal-header">
-                <h2 id="whitelist-modal-title">Manage Whitelist</h2>
-                <button class="icon-btn" data-close-modal aria-label="Close modal">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
+                <h2>Manage Whitelist</h2>
+                <button class="icon-btn close-modal" title="Close Modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
                 </button>
             </header>
             <div class="modal-body">
                 <p>Add domains you trust to bypass scanning.</p>
-                <div class="form-group" style="display: flex; gap: 8px;">
-                    <input type="text" id="whitelist-input" placeholder="e.g., mybank.com" aria-label="Domain to whitelist">
-                    <button id="whitelist-add-btn" class="btn btn-primary" aria-label="Add domain to whitelist">Add</button>
+                <div class="input-group">
+                    <input type="text" id="whitelist-input" placeholder="e.g., mybank.com">
+                    <button id="whitelist-add" class="btn btn-primary">Add</button>
                 </div>
                 <ul id="whitelist-list" class="item-list"></ul>
             </div>
         </div>
     </div>
 
-    <div id="bulk-scan-modal" class="modal-container hidden" role="dialog" aria-modal="true" aria-labelledby="bulk-scan-title">
-        <div class="modal-backdrop" data-close-modal></div>
-        <div class="modal-content card" role="document">
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content card">
             <header class="modal-header">
-                <h2 id="bulk-scan-title">Bulk URL Scan</h2>
-                <button class="icon-btn" data-close-modal aria-label="Close modal">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
+                <h2>Extension Settings</h2>
+                <button class="icon-btn close-modal" title="Close Modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
                 </button>
             </header>
             <div class="modal-body">
-                <p>Paste URLs (one per line) to queue them for scanning.</p>
-                <textarea id="bulk-urls-input" rows="5" placeholder="https://example.com&#10;https://suspicious-link.net"></textarea>
-                <button id="bulk-scan-submit" class="btn btn-primary" style="margin-top: 10px;">Queue URLs</button>
-                <hr class="divider">
-                <p>For large scans or CSV uploads, please use your dashboard.</p>
-                <a href="#" id="bulk-scan-dashboard-link" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">Go to Dashboard</a>
-            </div>
-        </div>
-    </div>
-    
-    <div id="submit-email-modal" class="modal-container hidden" role="dialog" aria-modal="true" aria-labelledby="submit-email-title">
-        <div class="modal-backdrop" data-close-modal></div>
-        <div class="modal-content card" role="document">
-            <header class="modal-header">
-                <h2 id="submit-email-title">Report a Threat</h2>
-                <button class="icon-btn" data-close-modal aria-label="Close modal">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
-                </button>
-            </header>
-            <div class="modal-body">
-                <p>Paste the full email source (including headers) or a suspicious URL for analysis.</p>
-                <textarea id="email-content-input" rows="6" placeholder="Paste email source or URL here..."></textarea>
-                <button id="email-submit-btn" class="btn btn-primary" style="margin-top: 10px;">Submit Report</button>
-                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--color-text-secondary);">Our security team will review within 24 hours.</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="settings-modal" class="modal-container hidden" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
-        <div class="modal-backdrop" data-close-modal></div>
-        <div class="modal-content card" role="document">
-            <header class="modal-header">
-                <h2 id="settings-modal-title">Extension Settings</h2>
-                <button class="icon-btn" data-close-modal aria-label="Close modal">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
-                </button>
-            </header>
-            <div class="modal-body">
-                <div class="form-group toggle-switch">
-                    <input type="checkbox" id="url-scan-toggle" class="toggle-input" aria-label="Scan URLs">
-                    <label for="url-scan-toggle" class="toggle-label"></label>
+                <h3 class="settings-subtitle">Scanning</h3>
+                <label class="toggle-switch-inline">
+                    <input type="checkbox" id="scan-urls-toggle" checked>
+                    <span class="toggle-slider-small"></span>
                     <span>Scan URLs</span>
-                </div>
-                <div class="form-group toggle-switch">
-                    <input type="checkbox" id="email-scan-toggle" class="toggle-input" aria-label="Scan Emails">
-                    <label for="email-scan-toggle" class="toggle-label"></label>
+                </label>
+                <label class="toggle-switch-inline">
+                    <input type="checkbox" id="scan-emails-toggle" checked>
+                    <span class="toggle-slider-small"></span>
                     <span>Scan Emails</span>
-                </div>
-                <div class="form-group toggle-switch">
-                    <input type="checkbox" id="data-sharing-toggle" class="toggle-input" aria-label="Allow data sharing for research">
-                    <label for="data-sharing-toggle" class="toggle-label"></label>
-                    <span>Share Data for Research</span>
-                </div>
-                <div class="form-group toggle-switch">
-                    <input type="checkbox" id="auto-submit-toggle" class="toggle-input" aria-label="Auto-submit threats">
-                    <label for="auto-submit-toggle" class="toggle-label"></label>
-                    <span>Auto-submit Threats</span>
-                </div>
-                <div class="form-group toggle-switch">
-                    <input type="checkbox" id="desktop-notify-toggle" class="toggle-input" aria-label="Desktop notifications">
-                    <label for="desktop-notify-toggle" class="toggle-label"></label>
-                    <span>Desktop Notifications</span>
-                </div>
-                <button id="test-notification-btn" class="btn btn-secondary" style="margin-top: 10px;">Test Notification</button>
+                </label>
+                <hr class="divider">
+                <h3 class="settings-subtitle">Privacy</h3>
+                <label class="toggle-switch-inline">
+                    <input type="checkbox" id="data-sharing-toggle">
+                    <span class="toggle-slider-small"></span>
+                    <span>Share anonymous data</span>
+                </label>
+                <label class="toggle-switch-inline">
+                    <input type="checkbox" id="auto-submit-toggle">
+                    <span class="toggle-slider-small"></span>
+                    <span>Auto-submit threats</span>
+                </label>
+                <hr class="divider">
+                <h3 class="settings-subtitle">Notifications</h3>
+                <label class="toggle-switch-inline">
+                    <input type="checkbox" id="notify-toggle" checked>
+                    <span class="toggle-slider-small"></span>
+                    <span>Desktop notifications</span>
+                </label>
             </div>
         </div>
     </div>
 
-    <div id="toast-notification" class="toast-notification hidden">
-        <p id="toast-message"></p>
+    <!-- BULK SCAN MODAL -->
+    <div id="bulk-scan-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content card">
+            <header class="modal-header">
+                <h2>Bulk Scan URLs</h2>
+                <button class="icon-btn close-modal" title="Close Modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
+                </button>
+            </header>
+            <div class="modal-body">
+                <p>Enter URLs to scan, one per line:</p>
+                <textarea id="bulk-scan-input" placeholder="https://example.com&#10;https://another-site.com" style="width: 100%; height: 120px; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; background-color: var(--color-bg-primary); color: var(--color-text-primary); font-family: monospace; resize: none;"></textarea>
+                <button id="bulk-scan-submit" class="btn btn-primary full-width" style="margin-top: 12px;">Scan URLs</button>
+            </div>
+        </div>
     </div>
+
+    <!-- THREAT REPORT MODAL -->
+    <div id="threat-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content card">
+            <header class="modal-header">
+                <h2>Report a Threat</h2>
+                <button class="icon-btn close-modal" title="Close Modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
+                </button>
+            </header>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="threat-url">Suspicious URL</label>
+                    <input type="text" id="threat-url" placeholder="https://suspicious-site.com">
+                </div>
+                <div class="form-group">
+                    <label for="threat-type">Type of Threat</label>
+                    <select id="threat-type" style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; background-color: var(--color-bg-primary); color: var(--color-text-primary); font-family: Inter, sans-serif;">
+                        <option value="phishing">Phishing</option>
+                        <option value="malware">Malware</option>
+                        <option value="spam">Spam</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="threat-desc">Description</label>
+                    <textarea id="threat-desc" placeholder="Describe the threat..." style="width: 100%; height: 80px; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; background-color: var(--color-bg-primary); color: var(--color-text-primary); font-family: Inter, sans-serif; resize: none;"></textarea>
+                </div>
+                <button id="threat-submit" class="btn btn-primary full-width">Submit Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PREMIUM PAGE -->
+    <div id="premium-page" class="page">
+        <header class="header">
+            <div class="header-left">
+                <button id="premium-back-btn" class="icon-btn" title="Back to Dashboard">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.828 12l5.364 5.364-1.414 1.414L9 13.414l-5.364 5.364-1.414-1.414L7.586 12l-5.364-5.364 1.414-1.414L9 10.586l5.364-5.364 1.414 1.414z"></path></svg>
+                </button>
+                <h1 class="logo">Premium</h1>
+            </div>
+        </header>
+
+        <main class="premium-main">
+            <div class="premium-hero">
+                <h2>PhishNet Premium</h2>
+                <p class="premium-tagline">Unlock Advanced Protection</p>
+            </div>
+
+            <div class="premium-pricing">
+                <div class="pricing-card">
+                    <div class="pricing-period">Monthly</div>
+                    <div class="pricing-amount">$9.99</div>
+                    <div class="pricing-interval">/month</div>
+                </div>
+                <div class="pricing-divider">OR</div>
+                <div class="pricing-card">
+                    <div class="pricing-period">Yearly</div>
+                    <div class="pricing-amount">$99</div>
+                    <div class="pricing-interval">/year</div>
+                    <div class="pricing-save">Save 17%</div>
+                </div>
+            </div>
+
+            <div class="premium-features">
+                <h3>Premium Features</h3>
+                <ul>
+                    <li>
+                        <span class="feature-icon">✓</span>
+                        <div>
+                            <div class="feature-name">Advanced Threat Detection</div>
+                            <div class="feature-desc">AI-powered detection of sophisticated phishing</div>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feature-icon">✓</span>
+                        <div>
+                            <div class="feature-name">Real-Time Protection</div>
+                            <div class="feature-desc">Instant blocking of malicious sites</div>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feature-icon">✓</span>
+                        <div>
+                            <div class="feature-name">Priority Support</div>
+                            <div class="feature-desc">24/7 dedicated support team</div>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feature-icon">✓</span>
+                        <div>
+                            <div class="feature-name">Dark Web Monitoring</div>
+                            <div class="feature-desc">Monitor dark web for your credentials</div>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feature-icon">✓</span>
+                        <div>
+                            <div class="feature-name">Advanced Analytics</div>
+                            <div class="feature-desc">Detailed reports and threat insights</div>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feature-icon">✓</span>
+                        <div>
+                            <div class="feature-name">Multi-Device Sync</div>
+                            <div class="feature-desc">Protect all your devices at once</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <button class="btn btn-primary premium-cta">Upgrade to Premium</button>
+
+            <div class="premium-footer">
+                <p>14-day free trial • Cancel anytime • No credit card required</p>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>By using the extension you agree with <a href="#">Terms and Conditions</a> and <a href="#">Privacy Policy</a></p>
+        </footer>
+    </div>
+
+    <!-- PREMIUM MODAL (for button in menu) -->
+    <div id="premium-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content card">
+            <header class="modal-header">
+                <h2>PhishNet Premium</h2>
+                <button class="icon-btn close-modal" title="Close Modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
+                </button>
+            </header>
+            <div class="modal-body">
+                <h3 style="color: var(--color-accent); margin: 0 0 12px 0;">Upgrade to Premium</h3>
+                <ul style="list-style: none; padding: 0; margin-bottom: 16px;">
+                    <li style="padding: 8px 0; border-bottom: 1px solid var(--color-border);">✓ Advanced threat detection</li>
+                    <li style="padding: 8px 0; border-bottom: 1px solid var(--color-border);">✓ Real-time protection</li>
+                    <li style="padding: 8px 0; border-bottom: 1px solid var(--color-border);">✓ Priority support</li>
+                    <li style="padding: 8px 0;">✓ Dark web monitoring</li>
+                </ul>
+                <p style="font-size: 0.9rem; color: var(--color-accent); font-weight: 600; margin: 12px 0;">$9.99/month or $99/year</p>
+                <button id="modal-upgrade-btn" class="btn btn-primary full-width">Upgrade Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast"></div>
 
     <script src="popup.js"></script>
 </body>

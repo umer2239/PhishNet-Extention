@@ -1,11 +1,8 @@
 {
   "manifest_version": 3,
   "name": "PhishNet Protection",
-  "version": "1.0",
-  "description": "Protects against phishing and scans URLs/emails.",
-  "action": {
-    "default_popup": "index.html"
-  },
+  "version": "1.0.0",
+  "description": "Advanced phishing protection at your fingertips",
   "permissions": [
     "storage",
     "notifications",
@@ -13,5 +10,14 @@
   ],
   "host_permissions": [
     "<all_urls>"
-  ]
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "PhishNet Protection"
+  },
+  "icons": {
+    "16": "images/icon-16.png",
+    "48": "images/icon-48.png",
+    "128": "images/icon-128.png"
+  }
 }
