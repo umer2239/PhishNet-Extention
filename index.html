@@ -27,7 +27,7 @@
                 <h1 class="logo">PhishNet</h1>
             </div>
             <div class="header-right">
-                <button id="intro-login-btn" class="btn btn-secondary btn-sm">Demo Login</button>
+                <button id="intro-login-btn" class="btn btn-secondary btn-sm">Login</button>
                 <button id="intro-signup-btn" class="btn btn-primary btn-sm">Sign Up</button>
             </div>
         </header>
@@ -46,6 +46,16 @@
 
     <!-- DASHBOARD PAGE -->
     <div id="dashboard-page" class="page">
+        <div class="cyber-bg">
+            <div class="cyber-grid"></div>
+            <div class="cyber-orbs">
+                <div class="orb orb-1"></div>
+                <div class="orb orb-2"></div>
+                <div class="orb orb-3"></div>
+            </div>
+            <div class="cyber-lines"></div>
+        </div>
+
         <header class="header">
             <div class="header-left">
                 <button id="menu-toggle-btn" class="icon-btn" title="Open Menu">
@@ -54,15 +64,15 @@
                 <h1 class="logo">PhishNet</h1>
             </div>
             <div class="header-right">
+                <span id="user-avatar" class="user-avatar" title="User Profile"></span>
                 <span id="username-display" class="username"></span>
-                <div class="user-avatar"></div>
             </div>
         </header>
 
         <main class="dashboard-main">
             <div class="protection-container">
                 <button id="protection-dial" class="protection-dial" role="switch" aria-checked="false" aria-label="Toggle PhishNet Protection">
-                    <div class="dial-logo">PHISHNET</div>
+                    <div class="dial-logo">PhishNet</div>
                     <span class="dial-status" id="dial-status">OFF</span>
                 </button>
                 <p class="timer-display" id="timer-display">10:00</p>
@@ -93,18 +103,18 @@
                 </button>
             </header>
             <ul class="menu-list">
-                <li><button class="menu-btn menu-dashboard" data-action="dashboard">📊 Dashboard</button></li>
+                <li><button class="menu-btn menu-dashboard" data-action="dashboard">Dashboard</button></li>
                 <li><hr></li>
-                <li><a href="#" class="menu-link">📈 View Reports</a></li>
-                <li><button class="menu-btn" data-action="report-threat">⚠️ Report a Threat</button></li>
-                <li><button class="menu-btn" data-action="bulk-scan">🔍 Bulk Scan URLs</button></li>
+                <li><a href="#" class="menu-link">View Reports</a></li>
+                <li><button class="menu-btn" data-action="report-threat">Report a Threat</button></li>
+                <li><button class="menu-btn" data-action="bulk-scan">Bulk Scan URLs</button></li>
                 <li><hr></li>
-                <li><button class="menu-btn" data-action="whitelist">🔒 Manage Whitelist</button></li>
-                <li><button class="menu-btn" data-action="settings">⚙️ Extension Settings</button></li>
-                <li><button class="menu-btn" data-action="premium">👑 Get Premium</button></li>
-                <li><a href="#" class="menu-link">❓ Help & Support</a></li>
+                <li><button class="menu-btn" data-action="whitelist">Manage Whitelist</button></li>
+                <li><button class="menu-btn" data-action="settings">Extension Settings</button></li>
+                <li><button class="menu-btn" data-action="premium">Get Premium</button></li>
+                <li><a href="#" class="menu-link">Help & Support</a></li>
                 <li><hr></li>
-                <li><button class="menu-btn logout" data-action="logout">🚪 Log Out</button></li>
+                <li><button class="menu-btn logout" data-action="logout">Log Out</button></li>
             </ul>
         </nav>
     </div>
@@ -121,17 +131,46 @@
             </header>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" placeholder="demo@phishnet.com" value="demo@phishnet.com">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" placeholder="your@email.com">
                 </div>
                 <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="Demo123!" value="Demo123!">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="Your password">
                 </div>
-                <p class="form-hint">Demo credentials pre-filled. Click Login to continue.</p>
                 <button id="login-submit" class="btn btn-primary full-width">Login</button>
                 <hr class="divider">
-                <p class="form-hint">Demo account for testing. All data is local.</p>
+                <p class="form-hint">Don't have an account? <button id="switch-to-signup" class="btn-link">Sign up here</button></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIGNUP MODAL -->
+    <div id="signup-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content card">
+            <header class="modal-header">
+                <h2>Create Account</h2>
+                <button class="icon-btn close-modal" title="Close Modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
+                </button>
+            </header>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" placeholder="Your full name">
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" placeholder="Create a password">
+                </div>
+                <button id="signup-submit" class="btn btn-primary full-width">Sign Up</button>
+                <hr class="divider">
+                <p class="form-hint">Already have an account? <button id="switch-to-login" class="btn-link">Login here</button></p>
             </div>
         </div>
     </div>
@@ -255,6 +294,16 @@
 
     <!-- PREMIUM PAGE -->
     <div id="premium-page" class="page">
+        <div class="cyber-bg">
+            <div class="cyber-grid"></div>
+            <div class="cyber-orbs">
+                <div class="orb orb-1"></div>
+                <div class="orb orb-2"></div>
+                <div class="orb orb-3"></div>
+            </div>
+            <div class="cyber-lines"></div>
+        </div>
+
         <header class="header">
             <div class="header-left">
                 <button id="premium-back-btn" class="icon-btn" title="Back to Dashboard">
@@ -270,18 +319,44 @@
                 <p class="premium-tagline">Unlock Advanced Protection</p>
             </div>
 
-            <div class="premium-pricing">
+            <div class="premium-pricing-grid">
                 <div class="pricing-card">
+                    <div class="pricing-period">Free</div>
+                    <div class="pricing-amount">$0</div>
+                    <div class="pricing-interval">/forever</div>
+                    <button class="btn btn-secondary full-width" style="margin-top: 16px;">Current Plan</button>
+                    <div class="pricing-features">
+                        <div class="pricing-feature">Limited scans</div>
+                        <div class="pricing-feature">Basic protection</div>
+                    </div>
+                </div>
+                <div class="pricing-card featured">
+                    <div class="pricing-badge">POPULAR</div>
                     <div class="pricing-period">Monthly</div>
                     <div class="pricing-amount">$9.99</div>
                     <div class="pricing-interval">/month</div>
+                    <button class="btn btn-primary full-width" style="margin-top: 16px;">Subscribe</button>
+                    <div class="pricing-features">
+                        <div class="pricing-feature">Unlimited scans</div>
+                        <div class="pricing-feature">Advanced detection</div>
+                        <div class="pricing-feature">Priority support</div>
+                        <div class="pricing-feature">Real-time protection</div>
+                    </div>
                 </div>
-                <div class="pricing-divider">OR</div>
                 <div class="pricing-card">
-                    <div class="pricing-period">Yearly</div>
+                    <div class="pricing-badge">BEST VALUE</div>
+                    <div class="pricing-period">Annually</div>
                     <div class="pricing-amount">$99</div>
                     <div class="pricing-interval">/year</div>
                     <div class="pricing-save">Save 17%</div>
+                    <button class="btn btn-primary full-width" style="margin-top: 16px;">Subscribe</button>
+                    <div class="pricing-features">
+                        <div class="pricing-feature">Unlimited scans</div>
+                        <div class="pricing-feature">Advanced detection</div>
+                        <div class="pricing-feature">Priority support</div>
+                        <div class="pricing-feature">Real-time protection</div>
+                        <div class="pricing-feature">Dark web monitoring</div>
+                    </div>
                 </div>
             </div>
 

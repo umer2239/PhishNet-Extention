@@ -44,6 +44,7 @@ body {
     width: 100%;
     height: 100%;
     flex-direction: column;
+    position: relative; /* Ensure z-index works */
 }
 
 .page.active {
@@ -60,6 +61,7 @@ body {
     border-bottom: 1px solid var(--color-border);
     flex-shrink: 0;
     z-index: 10;
+    position: relative;
 }
 
 .header-left, .header-right {
@@ -104,14 +106,44 @@ body {
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--color-text-primary);
+    margin-right: 8px;
 }
 
 .user-avatar {
-    width: 28px;
-    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+}
+
+.avatar-circle {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(11, 99, 217, 0.3), rgba(0, 183, 217, 0.1));
-    border: 1px solid var(--color-text-secondary);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    color: var(--color-text-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--color-border);
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: inherit;
+    font-weight: 600;
+    padding: 0;
+    transition: color var(--transition-speed);
+}
+
+.btn-link:hover {
+    color: #4B93FF;
 }
 
 /* INTRO PAGE */
@@ -123,6 +155,7 @@ body {
     justify-content: center;
     position: relative;
     padding: 20px;
+    z-index: 1; /* Above background */
 }
 
 .phishnet-title-container {
@@ -177,7 +210,7 @@ body {
     height: 100%;
     z-index: 0;
     overflow: hidden;
-    background: linear-gradient(135deg, #0a0e27 0%, #051650 50%, #000000 100%);
+    background: #050510;
 }
 
 .cyber-grid {
@@ -186,17 +219,19 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: 
-        linear-gradient(0deg, transparent 24%, rgba(11, 99, 217, 0.1) 25%, rgba(11, 99, 217, 0.1) 26%, transparent 27%, transparent 74%, rgba(11, 99, 217, 0.1) 75%, rgba(11, 99, 217, 0.1) 76%, transparent 77%, transparent),
-        linear-gradient(90deg, transparent 24%, rgba(11, 99, 217, 0.1) 25%, rgba(11, 99, 217, 0.1) 26%, transparent 27%, transparent 74%, rgba(11, 99, 217, 0.1) 75%, rgba(11, 99, 217, 0.1) 76%, transparent 77%, transparent);
-    background-size: 50px 50px;
-    animation: grid-move 8s linear infinite;
-    opacity: 0.3;
+    background-image: repeating-linear-gradient(
+        0deg,
+        rgba(0, 255, 150, 0.03),
+        rgba(0, 255, 150, 0.03) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    animation: scanlines 8s linear infinite;
 }
 
-@keyframes grid-move {
+@keyframes scanlines {
     0% { transform: translateY(0); }
-    100% { transform: translateY(50px); }
+    100% { transform: translateY(10px); }
 }
 
 .cyber-orbs {
@@ -210,43 +245,39 @@ body {
 .orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(40px);
-    opacity: 0.3;
-    animation: float 8s ease-in-out infinite;
+    animation: neon-pulse 3s ease-in-out infinite;
 }
 
 .orb-1 {
-    width: 100px;
-    height: 100px;
-    background: radial-gradient(circle, rgba(11, 99, 217, 0.5), transparent);
-    top: 10%;
-    left: 10%;
-    animation: float 12s ease-in-out infinite;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, rgba(0, 255, 150, 0.3), transparent);
+    top: 15%;
+    left: 20%;
+    animation: neon-pulse 3s ease-in-out infinite;
 }
 
 .orb-2 {
-    width: 80px;
-    height: 80px;
-    background: radial-gradient(circle, rgba(0, 183, 217, 0.5), transparent);
-    bottom: 20%;
-    right: 10%;
-    animation: float 14s ease-in-out infinite reverse;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, rgba(11, 99, 217, 0.3), transparent);
+    bottom: 25%;
+    right: 15%;
+    animation: neon-pulse 4s ease-in-out infinite;
 }
 
 .orb-3 {
-    width: 120px;
-    height: 120px;
-    background: radial-gradient(circle, rgba(11, 99, 217, 0.3), transparent);
-    top: 50%;
-    right: 5%;
-    animation: float 16s ease-in-out infinite;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(0, 183, 217, 0.2), transparent);
+    top: 45%;
+    right: 10%;
+    animation: neon-pulse 5s ease-in-out infinite;
 }
 
-@keyframes float {
-    0%, 100% { transform: translate(0, 0); }
-    25% { transform: translate(10px, -20px); }
-    50% { transform: translate(-15px, 20px); }
-    75% { transform: translate(20px, 10px); }
+@keyframes neon-pulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 0.2; }
 }
 
 .cyber-lines {
@@ -255,17 +286,19 @@ body {
     height: 100%;
     top: 0;
     left: 0;
-    background-image: 
-        linear-gradient(90deg, transparent 49%, rgba(0, 183, 217, 0.2) 50%, transparent 51%),
-        linear-gradient(0deg, transparent 49%, rgba(11, 99, 217, 0.15) 50%, transparent 51%);
-    background-size: 200px 200px;
-    animation: lines-pulse 4s ease-in-out infinite;
-    opacity: 0.2;
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 50px,
+        rgba(0, 255, 100, 0.12) 50px,
+        rgba(0, 255, 100, 0.12) 51px
+    );
+    animation: neon-flicker 0.15s infinite;
 }
 
-@keyframes lines-pulse {
-    0%, 100% { opacity: 0.15; }
-    50% { opacity: 0.35; }
+@keyframes neon-flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+    20%, 24%, 55% { opacity: 0.3; }
 }
 
 /* DASHBOARD MAIN */
@@ -278,6 +311,8 @@ body {
     gap: 24px;
     padding: 24px;
     overflow-y: auto;
+    position: relative;
+    z-index: 1; /* Above background */
 }
 
 .protection-container {
@@ -301,6 +336,8 @@ body {
     transition: all var(--transition-speed);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     position: relative;
+    z-index: 2;
+    gap: 4px;
 }
 
 .protection-dial:hover {
@@ -315,39 +352,58 @@ body {
     text-align: center;
     letter-spacing: 1px;
     transition: all var(--transition-speed);
+    line-height: 1;
+    margin: 0;
+    padding: 0;
 }
 
 .dial-status {
     font-size: 1.2rem;
     font-weight: 700;
-    margin-top: 8px;
+    margin: 0;
+    padding: 0;
     color: #666;
     transition: color var(--transition-speed);
+    line-height: 1;
 }
 
 /* ACTIVE STATE */
 .protection-dial.is-active {
-    background: linear-gradient(135deg, rgba(11, 99, 217, 0.2), rgba(0, 183, 217, 0.1));
-    border-color: var(--color-primary);
-    box-shadow: 0 0 30px rgba(11, 99, 217, 0.5), 0 0 60px rgba(0, 183, 217, 0.2);
+    background: linear-gradient(135deg, #001a4d 0%, #002266 50%, #000d33 100%);
+    border: 2px solid #0099cc;
+    box-shadow: 
+        0 0 12px rgba(0, 153, 204, 0.4),
+        inset 0 0 15px rgba(0, 153, 204, 0.15),
+        inset 0 2px 5px rgba(255, 255, 255, 0.2);
+    animation: subtle-glow 2.5s ease-in-out infinite;
 }
 
 .protection-dial.is-active .dial-logo {
-    color: var(--color-text-primary);
-    text-shadow: 0 0 8px rgba(11, 99, 217, 0.8), 0 0 16px rgba(0, 183, 217, 0.5);
-    animation: glow-pulse 2s ease-in-out infinite;
+    color: #FFFFFF;
+    font-weight: 900;
+    text-shadow: none;
+    letter-spacing: 2px;
 }
 
 .protection-dial.is-active .dial-status {
-    color: var(--color-primary);
+    color: #FFFFFF;
+    font-weight: 900;
+    font-size: 1.4rem;
+    text-shadow: none;
 }
 
-@keyframes glow-pulse {
+@keyframes subtle-glow {
     0%, 100% { 
-        text-shadow: 0 0 8px rgba(11, 99, 217, 0.8), 0 0 16px rgba(0, 183, 217, 0.5);
+        box-shadow: 
+            0 0 12px rgba(0, 153, 204, 0.4),
+            inset 0 0 15px rgba(0, 153, 204, 0.15),
+            inset 0 2px 5px rgba(255, 255, 255, 0.2);
     }
     50% { 
-        text-shadow: 0 0 16px rgba(11, 99, 217, 1), 0 0 32px rgba(0, 183, 217, 0.8);
+        box-shadow: 
+            0 0 18px rgba(0, 153, 204, 0.6),
+            inset 0 0 20px rgba(0, 153, 204, 0.2),
+            inset 0 2px 8px rgba(255, 255, 255, 0.3);
     }
 }
 
@@ -467,6 +523,8 @@ body {
     border-top: 1px solid var(--color-border);
     background: var(--color-bg-secondary);
     flex-shrink: 0;
+    position: relative;
+    z-index: 5;
 }
 
 .footer p {
@@ -871,6 +929,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    position: relative;
+    z-index: 1;
 }
 
 .premium-hero {
@@ -897,81 +957,123 @@ body {
     font-weight: 600;
 }
 
-.premium-pricing {
+.premium-pricing-grid {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    padding: 16px;
-    background: rgba(11, 99, 217, 0.1);
-    border-radius: 8px;
-    border: 1px solid var(--color-border);
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    max-width: 100%;
 }
 
 .pricing-card {
-    flex: 1;
+    position: relative;
     text-align: center;
-    padding: 12px;
-    border-radius: 6px;
+    padding: 20px;
+    border-radius: 8px;
     background: var(--color-bg-primary);
     border: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.pricing-card.featured {
+    background: linear-gradient(135deg, rgba(11, 99, 217, 0.2), rgba(0, 183, 217, 0.1));
+    border: 2px solid #0099cc;
+    transform: none;
+}
+
+.pricing-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #0099cc;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
 .pricing-period {
-    font-size: 0.8rem;
-    color: var(--color-text-secondary);
-    font-weight: 600;
-    margin-bottom: 4px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 8px;
+    margin-top: 8px;
 }
 
 .pricing-amount {
-    font-size: 1.6rem;
+    font-size: 2rem;
     font-weight: 800;
-    color: var(--color-accent);
+    color: #0099cc;
+    margin: 8px 0 0 0;
 }
 
 .pricing-interval {
     font-size: 0.75rem;
     color: #999;
+    margin-bottom: 12px;
 }
 
 .pricing-save {
     font-size: 0.7rem;
     color: var(--color-safe);
-    font-weight: 600;
-    margin-top: 4px;
+    font-weight: 700;
+    margin-bottom: 12px;
     background: rgba(0, 255, 136, 0.1);
-    padding: 2px 6px;
-    border-radius: 3px;
+    padding: 4px 8px;
+    border-radius: 10px;
     display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.pricing-divider {
-    color: var(--color-text-secondary);
-    font-weight: 600;
+.pricing-features {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+    text-align: left;
+}
+
+.pricing-feature {
+    font-size: 0.8rem;
+    color: var(--color-text-primary);
+    padding-left: 16px;
+    position: relative;
+}
+
+.pricing-feature::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #0099cc;
+    font-weight: bold;
 }
 
 .premium-features {
-    padding: 16px;
-    background: rgba(11, 99, 217, 0.05);
+    padding: 12px;
+    background: var(--color-bg-secondary);
     border-radius: 8px;
-    border: 1px solid var(--color-border);
 }
 
 .premium-features h3 {
-    margin: 0 0 12px 0;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
     color: var(--color-text-primary);
-    font-size: 0.95rem;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .premium-features ul {
     list-style: none;
     padding: 0;
-    margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 .premium-features li {
@@ -983,40 +1085,27 @@ body {
 .feature-icon {
     color: var(--color-safe);
     font-weight: 800;
-    font-size: 1.1rem;
-    flex-shrink: 0;
-    margin-top: 1px;
+    font-size: 1rem;
+    line-height: 1.2;
 }
 
 .feature-name {
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--color-text-primary);
-    line-height: 1.3;
 }
 
 .feature-desc {
     font-size: 0.75rem;
     color: #999;
-    line-height: 1.2;
-    margin-top: 2px;
-}
-
-.premium-cta {
-    padding: 12px 24px;
-    font-size: 0.95rem;
-    font-weight: 700;
 }
 
 .premium-footer {
     text-align: center;
-    padding: 12px;
-    background: rgba(11, 99, 217, 0.05);
-    border-radius: 6px;
+    margin-top: 10px;
 }
 
 .premium-footer p {
-    font-size: 0.75rem;
-    color: #999;
-    margin: 0;
+    font-size: 0.7rem;
+    color: #666;
 }

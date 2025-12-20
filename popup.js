@@ -1,7 +1,4 @@
-// PhishNet Extension - Popup JavaScript
-
-const DEMO_EMAIL = 'demo@phishnet.com';
-const DEMO_PASSWORD = 'Demo123!';
+// PhishNet Extension - Popup JavaScript with User Authentication
 
 // PAGE ELEMENTS
 const introPage = document.getElementById('intro-page');
@@ -12,6 +9,9 @@ const premiumPage = document.getElementById('premium-page');
 const introLoginBtn = document.getElementById('intro-login-btn');
 const introSignupBtn = document.getElementById('intro-signup-btn');
 const loginSubmitBtn = document.getElementById('login-submit');
+const signupSubmitBtn = document.getElementById('signup-submit');
+const switchToSignupBtn = document.getElementById('switch-to-signup');
+const switchToLoginBtn = document.getElementById('switch-to-login');
 const menuToggleBtn = document.getElementById('menu-toggle-btn');
 const protectionDial = document.getElementById('protection-dial');
 const alwaysOnToggle = document.getElementById('always-on-toggle');
@@ -19,6 +19,7 @@ const taglineEl = document.getElementById('tagline');
 
 // MODALS
 const loginModal = document.getElementById('login-modal');
+const signupModal = document.getElementById('signup-modal');
 const drawer = document.getElementById('menu-drawer');
 const whitelistModal = document.getElementById('whitelist-modal');
 const settingsModal = document.getElementById('settings-modal');
@@ -28,13 +29,17 @@ const premiumModal = document.getElementById('premium-modal');
 const premiumBackBtn = document.getElementById('premium-back-btn');
 
 // MODAL INPUTS
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
+const loginEmailInput = document.getElementById('login-email');
+const loginPasswordInput = document.getElementById('login-password');
+const signupNameInput = document.getElementById('signup-name');
+const signupEmailInput = document.getElementById('signup-email');
+const signupPasswordInput = document.getElementById('signup-password');
 
 // UI ELEMENTS
 const dialStatus = document.getElementById('dial-status');
 const timerDisplay = document.getElementById('timer-display');
 const usernameDisplay = document.getElementById('username-display');
+const userAvatar = document.getElementById('user-avatar');
 const toast = document.getElementById('toast');
 const whitelistInput = document.getElementById('whitelist-input');
 const whitelistAddBtn = document.getElementById('whitelist-add');
@@ -43,6 +48,7 @@ const whitelistList = document.getElementById('whitelist-list');
 // STATE
 let state = {
     isLoggedIn: false,
+    currentUser: null,
     isProtected: false,
     alwaysOn: false,
     timerEndTime: 0,
@@ -57,6 +63,36 @@ let state = {
 };
 
 let timerInterval = null;
+
+// USER MANAGEMENT
+function getUsers() {
+    const stored = localStorage.getItem('phishNetUsers');
+    return stored ? JSON.parse(stored) : [];
+}
+
+function saveUsers(users) {
+    localStorage.setItem('phishNetUsers', JSON.stringify(users));
+}
+
+function getUserInitials(name, email) {
+    if (name && name.trim()) {
+        const parts = name.trim().split(' ');
+        const initials = parts.map(p => p.charAt(0).toUpperCase()).join('');
+        return initials.slice(0, 2);
+    }
+    if (email && email.trim()) {
+        return email.charAt(0).toUpperCase() + (email.charAt(1) || '').toUpperCase();
+    }
+    return 'U';
+}
+
+function createUserAvatar(name, email) {
+    const initials = getUserInitials(name, email);
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar-circle';
+    avatar.textContent = initials;
+    return avatar;
+}
 
 // LOAD STATE
 function loadState() {
@@ -165,9 +201,11 @@ function updateTimerDisplay() {
 
 // UPDATE UI
 function updateUI() {
-    if (state.isLoggedIn) {
+    if (state.isLoggedIn && state.currentUser) {
         showPage(dashboardPage);
-        usernameDisplay.textContent = 'Demo User';
+        usernameDisplay.textContent = state.currentUser.name;
+        userAvatar.innerHTML = '';
+        userAvatar.appendChild(createUserAvatar(state.currentUser.name, state.currentUser.email));
     } else {
         showPage(introPage);
         typewriter(taglineEl, 'Advanced Phishing Protection at Your Fingertips...', 60);
@@ -185,16 +223,64 @@ function updateUI() {
     }
 }
 
-// LOGIN HANDLER
+// AUTHENTICATION HANDLERS
+function handleSignup(name, email, password) {
+    if (!name.trim() || !email.trim() || !password.trim()) {
+        showToast('Please fill in all fields');
+        return;
+    }
+
+    const users = getUsers();
+    const userExists = users.some(u => u.email.toLowerCase() === email.toLowerCase());
+
+    if (userExists) {
+        showToast('Email already registered');
+        return;
+    }
+
+    const newUser = {
+        id: Date.now(),
+        name: name.trim(),
+        email: email.trim(),
+        password: password
+    };
+
+    users.push(newUser);
+    saveUsers(users);
+
+    state.isLoggedIn = true;
+    state.currentUser = { name: newUser.name, email: newUser.email };
+    saveState();
+    updateUI();
+    closeModal(signupModal);
+    showToast(`Welcome, ${newUser.name}!`);
+    
+    signupNameInput.value = '';
+    signupEmailInput.value = '';
+    signupPasswordInput.value = '';
+}
+
 function handleLogin(email, password) {
-    if (email === DEMO_EMAIL && password === DEMO_PASSWORD) {
+    if (!email.trim() || !password.trim()) {
+        showToast('Please enter email and password');
+        return;
+    }
+
+    const users = getUsers();
+    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+
+    if (user) {
         state.isLoggedIn = true;
+        state.currentUser = { name: user.name, email: user.email };
         saveState();
         updateUI();
         closeModal(loginModal);
-        showToast('Welcome back, Demo User!');
+        showToast(`Welcome back, ${user.name}!`);
+        
+        loginEmailInput.value = '';
+        loginPasswordInput.value = '';
     } else {
-        showToast('Invalid credentials. Use demo@phishnet.com / Demo123!');
+        showToast('Invalid email or password');
     }
 }
 
@@ -266,6 +352,7 @@ function renderWhitelist() {
 // LOGOUT
 function handleLogout() {
     state.isLoggedIn = false;
+    state.currentUser = null;
     state.isProtected = false;
     stopTimer();
     saveState();
@@ -276,14 +363,31 @@ function handleLogout() {
 
 // EVENT LISTENERS - INTRO PAGE
 introLoginBtn.addEventListener('click', () => openModal(loginModal));
-introSignupBtn.addEventListener('click', () => showToast('Sign up page would open'));
+introSignupBtn.addEventListener('click', () => openModal(signupModal));
 
-// EVENT LISTENERS - LOGIN
+// EVENT LISTENERS - AUTHENTICATION
 loginSubmitBtn.addEventListener('click', () => {
-    handleLogin(emailInput.value, passwordInput.value);
+    handleLogin(loginEmailInput.value, loginPasswordInput.value);
 });
-passwordInput.addEventListener('keypress', (e) => {
+loginPasswordInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') loginSubmitBtn.click();
+});
+
+signupSubmitBtn.addEventListener('click', () => {
+    handleSignup(signupNameInput.value, signupEmailInput.value, signupPasswordInput.value);
+});
+signupPasswordInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') signupSubmitBtn.click();
+});
+
+switchToSignupBtn.addEventListener('click', () => {
+    closeModal(loginModal);
+    openModal(signupModal);
+});
+
+switchToLoginBtn.addEventListener('click', () => {
+    closeModal(signupModal);
+    openModal(loginModal);
 });
 
 // EVENT LISTENERS - MENU
@@ -398,28 +502,28 @@ if (threatSubmit) {
     });
 }
 
-// EVENT LISTENERS - SETTINGS
-document.getElementById('scan-urls-toggle').addEventListener('change', (e) => {
+// SETTINGS HANDLERS
+document.getElementById('scan-urls-toggle')?.addEventListener('change', (e) => {
     state.settings.scanURLs = e.target.checked;
     saveState();
 });
 
-document.getElementById('scan-emails-toggle').addEventListener('change', (e) => {
+document.getElementById('scan-emails-toggle')?.addEventListener('change', (e) => {
     state.settings.scanEmails = e.target.checked;
     saveState();
 });
 
-document.getElementById('data-sharing-toggle').addEventListener('change', (e) => {
+document.getElementById('data-sharing-toggle')?.addEventListener('change', (e) => {
     state.settings.dataSharing = e.target.checked;
     saveState();
 });
 
-document.getElementById('auto-submit-toggle').addEventListener('change', (e) => {
+document.getElementById('auto-submit-toggle')?.addEventListener('change', (e) => {
     state.settings.autoSubmit = e.target.checked;
     saveState();
 });
 
-document.getElementById('notify-toggle').addEventListener('change', (e) => {
+document.getElementById('notify-toggle')?.addEventListener('change', (e) => {
     state.settings.desktopNotify = e.target.checked;
     saveState();
 });
