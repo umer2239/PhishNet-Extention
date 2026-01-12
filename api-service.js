@@ -1,7 +1,7 @@
 // PhishNet Extension API Service
 // Handles all backend API communication with JWT authentication
 
-const API_BASE_URL = 'http://localhost:5000/api/v1';
+const API_BASE_URL = 'https://backend-phishnet.onrender.com/api/v1';
 const TOKEN_KEY = 'phishnet_token';
 
 class ExtensionAPIService {
