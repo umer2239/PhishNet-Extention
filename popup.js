@@ -224,63 +224,80 @@ function updateUI() {
 }
 
 // AUTHENTICATION HANDLERS
-function handleSignup(name, email, password) {
+async function handleSignup(name, email, password) {
     if (!name.trim() || !email.trim() || !password.trim()) {
         showToast('Please fill in all fields');
         return;
     }
 
-    const users = getUsers();
-    const userExists = users.some(u => u.email.toLowerCase() === email.toLowerCase());
+    try {
+        const response = await extensionAPI.register({
+            firstName: name.trim().split(' ')[0],
+            lastName: name.trim().split(' ').slice(1).join(' ') || '',
+            email: email.trim(),
+            password: password,
+            confirmPassword: password
+        });
 
-    if (userExists) {
-        showToast('Email already registered');
-        return;
+        if (response.success) {
+            state.isLoggedIn = true;
+            state.currentUser = {
+                name: response.user.firstName + ' ' + response.user.lastName,
+                email: response.user.email
+            };
+            
+            // Also save to local users for backward compatibility
+            const users = getUsers();
+            users.push({
+                id: Date.now(),
+                name: state.currentUser.name,
+                email: state.currentUser.email,
+                password: password
+            });
+            saveUsers(users);
+            
+            saveState();
+            updateUI();
+            closeModal(signupModal);
+            showToast(`Welcome, ${state.currentUser.name}!`);
+            
+            signupNameInput.value = '';
+            signupEmailInput.value = '';
+            signupPasswordInput.value = '';
+        }
+    } catch (error) {
+        showToast(error.message || 'Registration failed');
     }
-
-    const newUser = {
-        id: Date.now(),
-        name: name.trim(),
-        email: email.trim(),
-        password: password
-    };
-
-    users.push(newUser);
-    saveUsers(users);
-
-    state.isLoggedIn = true;
-    state.currentUser = { name: newUser.name, email: newUser.email };
-    saveState();
-    updateUI();
-    closeModal(signupModal);
-    showToast(`Welcome, ${newUser.name}!`);
-    
-    signupNameInput.value = '';
-    signupEmailInput.value = '';
-    signupPasswordInput.value = '';
 }
 
-function handleLogin(email, password) {
+async function handleLogin(email, password) {
     if (!email.trim() || !password.trim()) {
         showToast('Please enter email and password');
         return;
     }
 
-    const users = getUsers();
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+    try {
+        const response = await extensionAPI.login({
+            email: email.trim(),
+            password: password
+        });
 
-    if (user) {
-        state.isLoggedIn = true;
-        state.currentUser = { name: user.name, email: user.email };
-        saveState();
-        updateUI();
-        closeModal(loginModal);
-        showToast(`Welcome back, ${user.name}!`);
-        
-        loginEmailInput.value = '';
-        loginPasswordInput.value = '';
-    } else {
-        showToast('Invalid email or password');
+        if (response.success) {
+            state.isLoggedIn = true;
+            state.currentUser = {
+                name: response.user.firstName + ' ' + response.user.lastName,
+                email: response.user.email
+            };
+            saveState();
+            updateUI();
+            closeModal(loginModal);
+            showToast(`Welcome back, ${state.currentUser.name}!`);
+            
+            loginEmailInput.value = '';
+            loginPasswordInput.value = '';
+        }
+    } catch (error) {
+        showToast(error.message || 'Invalid email or password');
     }
 }
 
@@ -350,15 +367,21 @@ function renderWhitelist() {
 }
 
 // LOGOUT
-function handleLogout() {
-    state.isLoggedIn = false;
-    state.currentUser = null;
-    state.isProtected = false;
-    stopTimer();
-    saveState();
-    updateUI();
-    closeDrawer();
-    showToast('Logged out successfully');
+async function handleLogout() {
+    try {
+        await extensionAPI.logout();
+    } catch (error) {
+        console.error('Logout error:', error);
+    } finally {
+        state.isLoggedIn = false;
+        state.currentUser = null;
+        state.isProtected = false;
+        stopTimer();
+        saveState();
+        updateUI();
+        closeDrawer();
+        showToast('Logged out successfully');
+    }
 }
 
 // EVENT LISTENERS - INTRO PAGE
