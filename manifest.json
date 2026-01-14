@@ -6,10 +6,12 @@
   "permissions": [
     "storage",
     "notifications",
-    "activeTab"
+    "activeTab",
+    "tabs"
   ],
   "host_permissions": [
     "http://localhost:5000/*",
+    "http://localhost:3000/*",
     "<all_urls>"
   ],
   "action": {

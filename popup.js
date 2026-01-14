@@ -1,5 +1,170 @@
 // PhishNet Extension - Popup JavaScript with User Authentication
 
+// Backend API Configuration
+const API_BASE_URL = 'http://localhost:5000/api/v1';
+const WEBSITE_URL = 'http://localhost:3000'; // Change to your website URL
+
+// API Service Class
+class PhishNetAPI {
+    static async request(endpoint, options = {}) {
+        const requestId = `REQ-${Date.now()}`;
+        const url = `${API_BASE_URL}${endpoint}`;
+        
+        console.log(`\n[${requestId}] 🌐 API REQUEST`);
+        console.log(`[${requestId}] URL: ${url}`);
+        console.log(`[${requestId}] Method: ${options.method || 'GET'}`);
+        
+        const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers
+        };
+
+        // Add authorization token if available
+        const token = await this.getAccessToken();
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+            console.log(`[${requestId}] ✓ Authorization token added`);
+        } else {
+            console.log(`[${requestId}] ⚠ No authorization token found`);
+        }
+
+        try {
+            console.log(`[${requestId}] Sending request...`);
+            const response = await fetch(url, {
+                ...options,
+                headers
+            });
+
+            console.log(`[${requestId}] Response received - Status: ${response.status} ${response.statusText}`);
+
+            if (!response.ok) {
+                // Get error details from response
+                const errorData = await response.json();
+                console.log(`[${requestId}] ❌ Request failed:`, errorData);
+                
+                if (response.status === 401) {
+                    // Check if this is a login/signup attempt or a protected endpoint
+                    const isAuthEndpoint = endpoint.includes('/auth/login') || endpoint.includes('/auth/signup');
+                    
+                    if (!isAuthEndpoint && token) {
+                        // For protected endpoints with existing token, try refresh
+                        console.log(`[${requestId}] ⚠ 401 Unauthorized on protected endpoint - Attempting token refresh...`);
+                        const refreshed = await this.refreshToken();
+                        if (refreshed) {
+                            console.log(`[${requestId}] ✓ Token refreshed, retrying request...`);
+                            return this.request(endpoint, options);
+                        }
+                        console.log(`[${requestId}] ❌ Token refresh failed`);
+                        throw new Error('Session expired. Please log in again.');
+                    } else {
+                        // For login/signup or no token, show backend error message
+                        console.log(`[${requestId}] ⚠ 401 on auth endpoint - Invalid credentials or account issue`);
+                        throw new Error(errorData.message || 'Authentication failed. Please check your credentials.');
+                    }
+                }
+                
+                throw new Error(errorData.message || 'API request failed');
+            }
+
+            const data = await response.json();
+            console.log(`[${requestId}] ✅ Request successful`);
+            return data;
+        } catch (error) {
+            console.error(`[${requestId}] ❌ Request error:`, error);
+            throw error;
+        }
+    }
+
+    static async signup(name, email, password) {
+        return this.request('/auth/signup', {
+            method: 'POST',
+            body: JSON.stringify({ name, email, password })
+        });
+    }
+
+    static async login(email, password) {
+        return this.request('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ email, password })
+        });
+    }
+
+    static async logout() {
+        return this.request('/auth/logout', {
+            method: 'POST'
+        });
+    }
+
+    static async getUserProfile() {
+        return this.request('/users/me', {
+            method: 'GET'
+        });
+    }
+
+    static async getUserStats() {
+        return this.request('/users/stats', {
+            method: 'GET'
+        });
+    }
+
+    static async checkUrl(url, status = 'unknown') {
+        return this.request('/urls/check', {
+            method: 'POST',
+            body: JSON.stringify({
+                url,
+                status,
+                reasons: [],
+                userAction: 'visited',
+                wasWarned: false
+            })
+        });
+    }
+
+    static async getAccessToken() {
+        return new Promise((resolve) => {
+            chrome.storage.local.get(['accessToken'], (result) => {
+                resolve(result.accessToken || null);
+            });
+        });
+    }
+
+    static async getRefreshToken() {
+        return new Promise((resolve) => {
+            chrome.storage.local.get(['refreshToken'], (result) => {
+                resolve(result.refreshToken || null);
+            });
+        });
+    }
+
+    static async saveTokens(accessToken, refreshToken) {
+        return new Promise((resolve) => {
+            chrome.storage.local.set({ accessToken, refreshToken }, resolve);
+        });
+    }
+
+    static async refreshToken() {
+        try {
+            const refreshToken = await this.getRefreshToken();
+            if (!refreshToken) return false;
+
+            const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refreshToken })
+            });
+
+            if (!response.ok) return false;
+
+            const data = await response.json();
+            await this.saveTokens(data.data.accessToken, data.data.refreshToken);
+            return true;
+        } catch (error) {
+            console.error('Token refresh failed:', error);
+            return false;
+        }
+    }
+}
+
 // PAGE ELEMENTS
 const introPage = document.getElementById('intro-page');
 const dashboardPage = document.getElementById('dashboard-page');
@@ -9,9 +174,7 @@ const premiumPage = document.getElementById('premium-page');
 const introLoginBtn = document.getElementById('intro-login-btn');
 const introSignupBtn = document.getElementById('intro-signup-btn');
 const loginSubmitBtn = document.getElementById('login-submit');
-const signupSubmitBtn = document.getElementById('signup-submit');
-const switchToSignupBtn = document.getElementById('switch-to-signup');
-const switchToLoginBtn = document.getElementById('switch-to-login');
+const gotoSignupBtn = document.getElementById('goto-signup');
 const menuToggleBtn = document.getElementById('menu-toggle-btn');
 const protectionDial = document.getElementById('protection-dial');
 const alwaysOnToggle = document.getElementById('always-on-toggle');
@@ -19,7 +182,6 @@ const taglineEl = document.getElementById('tagline');
 
 // MODALS
 const loginModal = document.getElementById('login-modal');
-const signupModal = document.getElementById('signup-modal');
 const drawer = document.getElementById('menu-drawer');
 const whitelistModal = document.getElementById('whitelist-modal');
 const settingsModal = document.getElementById('settings-modal');
@@ -31,9 +193,7 @@ const premiumBackBtn = document.getElementById('premium-back-btn');
 // MODAL INPUTS
 const loginEmailInput = document.getElementById('login-email');
 const loginPasswordInput = document.getElementById('login-password');
-const signupNameInput = document.getElementById('signup-name');
-const signupEmailInput = document.getElementById('signup-email');
-const signupPasswordInput = document.getElementById('signup-password');
+const loginPwToggle = document.getElementById('loginPwToggle');
 
 // UI ELEMENTS
 const dialStatus = document.getElementById('dial-status');
@@ -45,7 +205,7 @@ const whitelistInput = document.getElementById('whitelist-input');
 const whitelistAddBtn = document.getElementById('whitelist-add');
 const whitelistList = document.getElementById('whitelist-list');
 
-// STATE
+// STATE MANAGEMENT (keep localStorage for UI state only, not user data)
 let state = {
     isLoggedIn: false,
     currentUser: null,
@@ -63,16 +223,6 @@ let state = {
 };
 
 let timerInterval = null;
-
-// USER MANAGEMENT
-function getUsers() {
-    const stored = localStorage.getItem('phishNetUsers');
-    return stored ? JSON.parse(stored) : [];
-}
-
-function saveUsers(users) {
-    localStorage.setItem('phishNetUsers', JSON.stringify(users));
-}
 
 function getUserInitials(name, email) {
     if (name && name.trim()) {
@@ -231,30 +381,21 @@ async function handleSignup(name, email, password) {
     }
 
     try {
-        const response = await extensionAPI.register({
-            firstName: name.trim().split(' ')[0],
-            lastName: name.trim().split(' ').slice(1).join(' ') || '',
-            email: email.trim(),
-            password: password,
-            confirmPassword: password
-        });
+        signupSubmitBtn.disabled = true;
+        signupSubmitBtn.textContent = 'Signing up...';
+
+        const response = await PhishNetAPI.signup(name.trim(), email.trim(), password);
 
         if (response.success) {
+            // Save tokens
+            await PhishNetAPI.saveTokens(response.data.accessToken, response.data.refreshToken);
+
             state.isLoggedIn = true;
             state.currentUser = {
-                name: response.user.firstName + ' ' + response.user.lastName,
-                email: response.user.email
+                name: response.data.user.name,
+                email: response.data.user.email,
+                userId: response.data.user._id
             };
-            
-            // Also save to local users for backward compatibility
-            const users = getUsers();
-            users.push({
-                id: Date.now(),
-                name: state.currentUser.name,
-                email: state.currentUser.email,
-                password: password
-            });
-            saveUsers(users);
             
             saveState();
             updateUI();
@@ -267,6 +408,9 @@ async function handleSignup(name, email, password) {
         }
     } catch (error) {
         showToast(error.message || 'Registration failed');
+    } finally {
+        signupSubmitBtn.disabled = false;
+        signupSubmitBtn.textContent = 'Sign Up';
     }
 }
 
@@ -276,18 +420,39 @@ async function handleLogin(email, password) {
         return;
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+        showToast('Please enter a valid email address');
+        return;
+    }
+
     try {
-        const response = await extensionAPI.login({
-            email: email.trim(),
-            password: password
-        });
+        loginSubmitBtn.disabled = true;
+        loginSubmitBtn.textContent = 'Logging in...';
+
+        console.log('🔐 Attempting login...', { email: email.trim() });
+        const response = await PhishNetAPI.login(email.trim(), password);
+        console.log('✅ Login response received:', response);
 
         if (response.success) {
+            // Save tokens
+            await PhishNetAPI.saveTokens(response.data.accessToken, response.data.refreshToken);
+
             state.isLoggedIn = true;
+            // Handle both firstName/lastName (website schema) and name (legacy)
+            const fullName = response.data.user.firstName && response.data.user.lastName 
+                ? `${response.data.user.firstName} ${response.data.user.lastName}`
+                : response.data.user.name || 'User';
+            
             state.currentUser = {
-                name: response.user.firstName + ' ' + response.user.lastName,
-                email: response.user.email
+                name: fullName,
+                email: response.data.user.email,
+                userId: response.data.user._id,
+                firstName: response.data.user.firstName,
+                lastName: response.data.user.lastName
             };
+            
             saveState();
             updateUI();
             closeModal(loginModal);
@@ -297,7 +462,24 @@ async function handleLogin(email, password) {
             loginPasswordInput.value = '';
         }
     } catch (error) {
-        showToast(error.message || 'Invalid email or password');
+        console.error('❌ Login error:', error);
+        
+        // Show specific error message from backend
+        let errorMessage = 'Login failed. Please try again.';
+        
+        if (error.message) {
+            // Backend returns specific messages like:
+            // - "No account found with this email. Please sign up first."
+            // - "Incorrect password. Please try again."
+            // - "Email is required"
+            // - "Invalid email format"
+            errorMessage = error.message;
+        }
+        
+        showToast(errorMessage);
+    } finally {
+        loginSubmitBtn.disabled = false;
+        loginSubmitBtn.textContent = 'Login';
     }
 }
 
@@ -369,7 +551,7 @@ function renderWhitelist() {
 // LOGOUT
 async function handleLogout() {
     try {
-        await extensionAPI.logout();
+        await PhishNetAPI.logout();
     } catch (error) {
         console.error('Logout error:', error);
     } finally {
@@ -378,6 +560,10 @@ async function handleLogout() {
         state.isProtected = false;
         stopTimer();
         saveState();
+        
+        // Clear tokens
+        chrome.storage.local.remove(['accessToken', 'refreshToken']);
+        
         updateUI();
         closeDrawer();
         showToast('Logged out successfully');
@@ -385,33 +571,36 @@ async function handleLogout() {
 }
 
 // EVENT LISTENERS - INTRO PAGE
-introLoginBtn.addEventListener('click', () => openModal(loginModal));
-introSignupBtn.addEventListener('click', () => openModal(signupModal));
+introLoginBtn.addEventListener('click', () => {
+    // Open login modal inside extension
+    openModal(loginModal);
+});
+
+// Signup button removed from extension - users sign up on website directly
 
 // EVENT LISTENERS - AUTHENTICATION
+// Login handled inside extension using extension backend
 loginSubmitBtn.addEventListener('click', () => {
     handleLogin(loginEmailInput.value, loginPasswordInput.value);
 });
+
 loginPasswordInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') loginSubmitBtn.click();
 });
 
-signupSubmitBtn.addEventListener('click', () => {
-    handleSignup(signupNameInput.value, signupEmailInput.value, signupPasswordInput.value);
-});
-signupPasswordInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') signupSubmitBtn.click();
+// "Sign up on website" button - redirects to website
+gotoSignupBtn.addEventListener('click', () => {
+    chrome.tabs.create({ url: `${WEBSITE_URL}/signup.html?source=extension` });
 });
 
-switchToSignupBtn.addEventListener('click', () => {
-    closeModal(loginModal);
-    openModal(signupModal);
-});
-
-switchToLoginBtn.addEventListener('click', () => {
-    closeModal(signupModal);
-    openModal(loginModal);
-});
+// Password toggle functionality
+if (loginPwToggle) {
+    loginPwToggle.addEventListener('click', () => {
+        const isPassword = loginPasswordInput.type === 'password';
+        loginPasswordInput.type = isPassword ? 'text' : 'password';
+        loginPwToggle.classList.toggle('active', !isPassword);
+    });
+}
 
 // EVENT LISTENERS - MENU
 menuToggleBtn.addEventListener('click', openDrawer);
@@ -552,4 +741,31 @@ document.getElementById('notify-toggle')?.addEventListener('change', (e) => {
 });
 
 // INITIALIZE
-loadState();
+async function initializeApp() {
+    // Check if user is already logged in
+    const token = await PhishNetAPI.getAccessToken();
+    if (token) {
+        try {
+            const response = await PhishNetAPI.getUserProfile();
+            state.isLoggedIn = true;
+            state.currentUser = {
+                name: response.data.name,
+                email: response.data.email,
+                userId: response.data._id
+            };
+        } catch (error) {
+            console.error('Failed to fetch user profile:', error);
+            // Clear invalid tokens
+            chrome.storage.local.remove(['accessToken', 'refreshToken']);
+        }
+    }
+    
+    loadState();
+}
+
+initializeApp();
+
+// ============================================
+// NOTE: Extension handles login locally
+// Signup redirects to website, but user must return to extension to login
+// ============================================

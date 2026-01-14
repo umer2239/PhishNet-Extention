@@ -1109,3 +1109,105 @@ body {
     font-size: 0.7rem;
     color: #666;
 }
+
+/* ========================================================================= */
+/* LOGIN MODAL - WEBSITE MATCHING STYLES */
+/* ========================================================================= */
+
+.login-card-extension {
+    max-width: 360px;
+}
+
+.login-description {
+    font-size: 0.85rem;
+    color: #999;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.login-features-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: rgba(11, 99, 217, 0.05);
+    border-radius: 6px;
+    border: 1px solid rgba(11, 99, 217, 0.15);
+}
+
+.login-feature-compact {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8rem;
+    color: #ccc;
+}
+
+.feature-icon-small {
+    width: 18px;
+    height: 18px;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--color-text-secondary);
+    box-shadow: 0 0 0 3px rgba(11, 99, 217, 0.1);
+}
+
+.form-input::placeholder {
+    color: #666;
+}
+
+.input-with-toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-toggle .password-field {
+    padding-right: 40px;
+}
+
+.pw-toggle-ext {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    transition: color var(--transition-speed);
+}
+
+.pw-toggle-ext:hover {
+    color: var(--color-text-secondary);
+}
+
+.pw-toggle-ext svg {
+    width: 20px;
+    height: 20px;
+}
+
+.pw-toggle-ext.active {
+    color: var(--color-text-secondary);
+}
