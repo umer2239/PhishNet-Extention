@@ -624,15 +624,26 @@ document.querySelectorAll('.close-modal').forEach(btn => {
     });
 });
 
-// EVENT LISTENERS - MENU ITEMS
-document.querySelectorAll('.menu-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+// EVENT LISTENERS - MENU ITEMS (using event delegation)
+document.addEventListener('click', (e) => {
+    // Handle menu buttons
+    if (e.target.closest('.menu-btn')) {
+        const btn = e.target.closest('.menu-btn');
         const action = btn.getAttribute('data-action');
+        console.log(`Menu button clicked: ${action}`);
         closeDrawer();
         
         switch(action) {
             case 'dashboard':
-                showPage(dashboardPage);
+                // Redirect to website dashboard in a new tab
+                try {
+                    console.log(`Opening dashboard: ${WEBSITE_URL}/dashboard.html`);
+                    const url = `${WEBSITE_URL}/dashboard.html`;
+                    console.log(`Full URL: ${url}`);
+                    window.open(url, '_blank');
+                } catch (error) {
+                    console.error('Error opening dashboard:', error);
+                }
                 break;
             case 'report-threat':
                 openModal(threatModal);
@@ -654,8 +665,28 @@ document.querySelectorAll('.menu-btn').forEach(btn => {
                 handleLogout();
                 break;
         }
-    });
-});
+    }
+    
+    // Handle menu links with data-action
+    if (e.target.closest('.menu-link[data-action]')) {
+        e.preventDefault();
+        const link = e.target.closest('.menu-link[data-action]');
+        const action = link.getAttribute('data-action');
+        console.log(`Menu link clicked: ${action}`);
+        closeDrawer();
+        
+        if (action === 'view-reports') {
+            try {
+                console.log(`Opening reports: ${WEBSITE_URL}/reports.html`);
+                const url = `${WEBSITE_URL}/reports.html`;
+                console.log(`Full URL: ${url}`);
+                window.open(url, '_blank');
+            } catch (error) {
+                console.error('Error opening reports:', error);
+            }
+        }
+    }
+}, true); // Use capture phase to ensure we catch the events
 
 // PREMIUM PAGE
 if (premiumBackBtn) {
