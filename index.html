@@ -108,7 +108,7 @@
                 <li><button class="menu-btn" data-action="bulk-scan">Bulk Scan URLs</button></li>
                 <li><hr></li>
                 <li><button class="menu-btn" data-action="whitelist">Manage Whitelist</button></li>
-                <li><button class="menu-btn" data-action="settings">Extension Settings</button></li>
+                <li><button class="menu-btn" data-action="settings">Extension Settings (v1.0.1)</button></li>
                 <li><button class="menu-btn" data-action="premium">Get Premium</button></li>
                 <li><a href="#" class="menu-link">Help & Support</a></li>
                 <li><hr></li>
@@ -198,51 +198,6 @@
         </div>
     </div>
 
-    <!-- SETTINGS MODAL -->
-    <div id="settings-modal" class="modal">
-        <div class="modal-backdrop"></div>
-        <div class="modal-content card">
-            <header class="modal-header">
-                <h2>Extension Settings</h2>
-                <button class="icon-btn close-modal" title="Close Modal">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
-                </button>
-            </header>
-            <div class="modal-body">
-                <h3 class="settings-subtitle">Scanning</h3>
-                <label class="toggle-switch-inline">
-                    <input type="checkbox" id="scan-urls-toggle" checked>
-                    <span class="toggle-slider-small"></span>
-                    <span>Scan URLs</span>
-                </label>
-                <label class="toggle-switch-inline">
-                    <input type="checkbox" id="scan-emails-toggle" checked>
-                    <span class="toggle-slider-small"></span>
-                    <span>Scan Emails</span>
-                </label>
-                <hr class="divider">
-                <h3 class="settings-subtitle">Privacy</h3>
-                <label class="toggle-switch-inline">
-                    <input type="checkbox" id="data-sharing-toggle">
-                    <span class="toggle-slider-small"></span>
-                    <span>Share anonymous data</span>
-                </label>
-                <label class="toggle-switch-inline">
-                    <input type="checkbox" id="auto-submit-toggle">
-                    <span class="toggle-slider-small"></span>
-                    <span>Auto-submit threats</span>
-                </label>
-                <hr class="divider">
-                <h3 class="settings-subtitle">Notifications</h3>
-                <label class="toggle-switch-inline">
-                    <input type="checkbox" id="notify-toggle" checked>
-                    <span class="toggle-slider-small"></span>
-                    <span>Desktop notifications</span>
-                </label>
-            </div>
-        </div>
-    </div>
-
     <!-- BULK SCAN MODAL -->
     <div id="bulk-scan-modal" class="modal">
         <div class="modal-backdrop"></div>
@@ -292,6 +247,176 @@
                 <button id="threat-submit" class="btn btn-primary full-width">Submit Report</button>
             </div>
         </div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div id="settings-page" class="page">
+        <div class="cyber-bg">
+            <div class="cyber-grid"></div>
+            <div class="cyber-orbs">
+                <div class="orb orb-1"></div>
+                <div class="orb orb-2"></div>
+                <div class="orb orb-3"></div>
+            </div>
+            <div class="cyber-lines"></div>
+        </div>
+
+        <header class="header">
+            <div class="header-left">
+                <button id="settings-back-btn" class="icon-btn" title="Back to Dashboard">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.828 12l5.364 5.364-1.414 1.414L9 13.414l-5.364 5.364-1.414-1.414L7.586 12l-5.364-5.364 1.414-1.414L9 10.586l5.364-5.364 1.414 1.414z"></path></svg>
+                </button>
+                <h1 class="logo">Settings</h1>
+            </div>
+        </header>
+
+        <main class="settings-main">
+            <!-- PROFILE SECTION -->
+            <section class="settings-section profile-section">
+                <h2 class="section-title">User Profile</h2>
+                
+                <div class="profile-picture-container">
+                    <div class="profile-picture" id="profile-picture">
+                        <span class="profile-placeholder" aria-hidden="true">
+                            <svg class="profile-placeholder-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Z"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <input type="file" id="profile-picture-input" accept="image/*" style="display: none;">
+                    <button id="profile-picture-btn" class="btn btn-secondary btn-sm">Upload Picture</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="profile-name">Full Name</label>
+                    <input type="text" id="profile-name" class="form-input" placeholder="Your Name">
+                </div>
+
+                <div class="form-group">
+                    <label for="profile-email">Email Address</label>
+                    <input type="email" id="profile-email" class="form-input" placeholder="your@email.com" readonly>
+                </div>
+
+                <button id="profile-save-btn" class="btn btn-primary full-width">Save Profile Changes</button>
+            </section>
+
+            <!-- SCANNING SETTINGS -->
+            <section class="settings-section">
+                <h2 class="section-title">Scanning Settings</h2>
+                
+                <label class="toggle-switch-settings">
+                    <input type="checkbox" id="scan-urls-toggle-page" checked>
+                    <span class="toggle-slider-settings"></span>
+                    <div class="toggle-content">
+                        <span class="toggle-label-settings">Scan URLs</span>
+                        <span class="toggle-desc">Automatically scan links you visit</span>
+                    </div>
+                </label>
+
+                <label class="toggle-switch-settings">
+                    <input type="checkbox" id="scan-emails-toggle-page" checked>
+                    <span class="toggle-slider-settings"></span>
+                    <div class="toggle-content">
+                        <span class="toggle-label-settings">Scan Emails</span>
+                        <span class="toggle-desc">Check email links for threats</span>
+                    </div>
+                </label>
+
+                <label class="toggle-switch-settings">
+                    <input type="checkbox" id="real-time-protection-toggle">
+                    <span class="toggle-slider-settings"></span>
+                    <div class="toggle-content">
+                        <span class="toggle-label-settings">Real-time Protection</span>
+                        <span class="toggle-desc">Block threats instantly</span>
+                    </div>
+                </label>
+            </section>
+
+            <!-- PRIVACY SETTINGS -->
+            <section class="settings-section">
+                <h2 class="section-title">Privacy Settings</h2>
+                
+                <label class="toggle-switch-settings">
+                    <input type="checkbox" id="data-sharing-toggle-page">
+                    <span class="toggle-slider-settings"></span>
+                    <div class="toggle-content">
+                        <span class="toggle-label-settings">Share Anonymous Data</span>
+                        <span class="toggle-desc">Help improve PhishNet with usage data</span>
+                    </div>
+                </label>
+
+                <label class="toggle-switch-settings">
+                    <input type="checkbox" id="auto-submit-toggle-page">
+                    <span class="toggle-slider-settings"></span>
+                    <div class="toggle-content">
+                        <span class="toggle-label-settings">Auto-submit Threats</span>
+                        <span class="toggle-desc">Automatically report detected threats</span>
+                    </div>
+                </label>
+            </section>
+
+            <!-- NOTIFICATIONS SETTINGS -->
+            <section class="settings-section">
+                <h2 class="section-title">Notification Settings</h2>
+                
+                <label class="toggle-switch-settings">
+                    <input type="checkbox" id="notify-toggle-page" checked>
+                    <span class="toggle-slider-settings"></span>
+                    <div class="toggle-content">
+                        <span class="toggle-label-settings">Desktop Notifications</span>
+                        <span class="toggle-desc">Get alerted when threats are detected</span>
+                    </div>
+                </label>
+
+                <label class="toggle-switch-settings">
+                    <input type="checkbox" id="email-alerts-toggle-page">
+                    <span class="toggle-slider-settings"></span>
+                    <div class="toggle-content">
+                        <span class="toggle-label-settings">Email Alerts</span>
+                        <span class="toggle-desc">Receive email notifications for threats</span>
+                    </div>
+                </label>
+
+                <label class="toggle-switch-settings">
+                    <input type="checkbox" id="weekly-report-toggle-page">
+                    <span class="toggle-slider-settings"></span>
+                    <div class="toggle-content">
+                        <span class="toggle-label-settings">Weekly Security Report</span>
+                        <span class="toggle-desc">Get a summary of your security status</span>
+                    </div>
+                </label>
+            </section>
+
+            <!-- ADVANCED SETTINGS -->
+            <section class="settings-section">
+                <h2 class="section-title">Advanced Settings</h2>
+                
+                <label class="toggle-switch-settings">
+                    <input type="checkbox" id="block-pop-ups-toggle">
+                    <span class="toggle-slider-settings"></span>
+                    <div class="toggle-content">
+                        <span class="toggle-label-settings">Block Suspicious Pop-ups</span>
+                        <span class="toggle-desc">Block pop-ups from phishing sites</span>
+                    </div>
+                </label>
+
+                <label class="toggle-switch-settings">
+                    <input type="checkbox" id="safe-search-toggle">
+                    <span class="toggle-slider-settings"></span>
+                    <div class="toggle-content">
+                        <span class="toggle-label-settings">Safe Search Integration</span>
+                        <span class="toggle-desc">Mark phishing sites in search results</span>
+                    </div>
+                </label>
+            </section>
+
+            <!-- SAVE ALL SETTINGS BUTTON -->
+            <button id="settings-save-all-btn" class="btn btn-primary full-width settings-save-btn">Save All Settings</button>
+        </main>
+
+        <footer class="footer">
+            <p>By using the extension you agree with <a href="#">Terms and Conditions</a> and <a href="#">Privacy Policy</a></p>
+        </footer>
     </div>
 
     <!-- PREMIUM PAGE -->
@@ -450,5 +575,6 @@
     <div id="toast" class="toast"></div>
 
     <script src="popup.js"></script>
+    <script src="settings.js"></script>
 </body>
 </html>

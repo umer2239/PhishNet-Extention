@@ -168,7 +168,17 @@ class PhishNetAPI {
 // PAGE ELEMENTS
 const introPage = document.getElementById('intro-page');
 const dashboardPage = document.getElementById('dashboard-page');
+const settingsPage = document.getElementById('settings-page');
 const premiumPage = document.getElementById('premium-page');
+const settingsBackBtn = document.getElementById('settings-back-btn');
+
+// Expose page refs globally for settings.js/runtime debug
+window.__phishnetPages = {
+    introPage,
+    dashboardPage,
+    settingsPage,
+    premiumPage
+};
 
 // BUTTONS
 const introLoginBtn = document.getElementById('intro-login-btn');
@@ -184,7 +194,6 @@ const taglineEl = document.getElementById('tagline');
 const loginModal = document.getElementById('login-modal');
 const drawer = document.getElementById('menu-drawer');
 const whitelistModal = document.getElementById('whitelist-modal');
-const settingsModal = document.getElementById('settings-modal');
 const bulkScanModal = document.getElementById('bulk-scan-modal');
 const threatModal = document.getElementById('threat-modal');
 const premiumModal = document.getElementById('premium-modal');
@@ -221,6 +230,9 @@ let state = {
         desktopNotify: true
     }
 };
+
+// Expose state for other scripts (e.g., settings.js) to read current user
+window.__phishnetState = state;
 
 let timerInterval = null;
 
@@ -265,6 +277,9 @@ function showPage(page) {
         page.classList.add('active');
     }
 }
+
+// Expose for cross-file usage
+window.showPage = showPage;
 
 // SHOW MODAL
 function openModal(modal) {
@@ -656,7 +671,28 @@ document.addEventListener('click', (e) => {
                 openModal(whitelistModal);
                 break;
             case 'settings':
-                openModal(settingsModal);
+                // Show full settings page instead of modal
+                console.log('🔧 SETTINGS CLICKED - settingsPage:', settingsPage);
+                console.log('🔧 settingsPage classList before:', settingsPage?.classList);
+                
+                if (settingsPage) {
+                    showPage(settingsPage);
+                    console.log('✓ Called showPage(settingsPage)');
+                    console.log('✓ settingsPage classList after:', settingsPage.classList);
+                    
+                    // Give a small delay to ensure page rendered
+                    setTimeout(() => {
+                        // Initialize settings page if it hasn't been already
+                        if (typeof window.settingsPageInit === 'function') {
+                            console.log('✓ Calling settingsPageInit()');
+                            window.settingsPageInit();
+                        } else {
+                            console.warn('⚠ settingsPageInit not found');
+                        }
+                    }, 100);
+                } else {
+                    console.error('❌ settingsPage is null/undefined!');
+                }
                 break;
             case 'premium':
                 showPage(premiumPage);
@@ -711,6 +747,13 @@ if (modalUpgradeBtn) {
     });
 }
 
+// SETTINGS PAGE BACK BUTTON (ensure it always works)
+if (settingsBackBtn) {
+    settingsBackBtn.addEventListener('click', () => {
+        showPage(dashboardPage);
+    });
+}
+
 // EVENT LISTENERS - WHITELIST
 whitelistAddBtn.addEventListener('click', addToWhitelist);
 whitelistInput.addEventListener('keypress', (e) => {
@@ -744,32 +787,6 @@ if (threatSubmit) {
         }
     });
 }
-
-// SETTINGS HANDLERS
-document.getElementById('scan-urls-toggle')?.addEventListener('change', (e) => {
-    state.settings.scanURLs = e.target.checked;
-    saveState();
-});
-
-document.getElementById('scan-emails-toggle')?.addEventListener('change', (e) => {
-    state.settings.scanEmails = e.target.checked;
-    saveState();
-});
-
-document.getElementById('data-sharing-toggle')?.addEventListener('change', (e) => {
-    state.settings.dataSharing = e.target.checked;
-    saveState();
-});
-
-document.getElementById('auto-submit-toggle')?.addEventListener('change', (e) => {
-    state.settings.autoSubmit = e.target.checked;
-    saveState();
-});
-
-document.getElementById('notify-toggle')?.addEventListener('change', (e) => {
-    state.settings.desktopNotify = e.target.checked;
-    saveState();
-});
 
 // INITIALIZE
 async function initializeApp() {
