@@ -7,7 +7,9 @@ const {
   getUserStats,
   incrementSafeVisits,
   incrementUnsafeDetected,
-  incrementProtectionEvents
+  incrementProtectionEvents,
+  saveSettings,
+  getSettings
 } = require('../controllers/userController');
 
 // @route   GET /api/v1/users/me
@@ -39,5 +41,15 @@ router.post('/increment-unsafe-detected', authenticate, incrementUnsafeDetected)
 // @desc    Increment protection events count
 // @access  Private
 router.post('/increment-protection-events', authenticate, incrementProtectionEvents);
+
+// @route   POST /api/v1/users/settings
+// @desc    Save user settings and profile picture
+// @access  Private
+router.post('/settings', authenticate, saveSettings);
+
+// @route   GET /api/v1/users/settings
+// @desc    Get user settings and profile picture
+// @access  Private
+router.get('/settings', authenticate, getSettings);
 
 module.exports = router;

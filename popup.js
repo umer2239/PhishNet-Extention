@@ -3,6 +3,14 @@
 // Backend API Configuration
 const API_BASE_URL = 'http://localhost:5000/api/v1';
 const WEBSITE_URL = 'http://localhost:3000'; // Change to your website URL
+const USE_SETTINGS_API = false; // Toggle to avoid 404s when settings endpoint is unavailable
+const PRICING_PAGE_URL = 'http://localhost:3000/pricing.html';
+
+// Expose flag for other scripts
+window.__PHISHNET_USE_SETTINGS_API = USE_SETTINGS_API;
+
+// Keys shared with settings.js for profile assets
+const PROFILE_PICTURE_STORAGE_KEY = 'phishnetProfilePicture';
 
 // API Service Class
 class PhishNetAPI {
@@ -13,6 +21,8 @@ class PhishNetAPI {
         console.log(`\n[${requestId}] 🌐 API REQUEST`);
         console.log(`[${requestId}] URL: ${url}`);
         console.log(`[${requestId}] Method: ${options.method || 'GET'}`);
+
+        const suppressErrorLog = options.suppressErrorLog || false;
         
         const headers = {
             'Content-Type': 'application/json',
@@ -70,7 +80,9 @@ class PhishNetAPI {
             console.log(`[${requestId}] ✅ Request successful`);
             return data;
         } catch (error) {
-            console.error(`[${requestId}] ❌ Request error:`, error);
+            if (!suppressErrorLog) {
+                console.error(`[${requestId}] ❌ Request error:`, error);
+            }
             throw error;
         }
     }
@@ -99,6 +111,18 @@ class PhishNetAPI {
         return this.request('/users/me', {
             method: 'GET'
         });
+    }
+
+    static async getUserSettings() {
+        try {
+            return await this.request('/users/settings', {
+                method: 'GET',
+                suppressErrorLog: true
+            });
+        } catch (error) {
+            console.warn('⚠ getUserSettings failed (will continue without backend settings):', error?.message || error);
+            return null;
+        }
     }
 
     static async getUserStats() {
@@ -169,15 +193,13 @@ class PhishNetAPI {
 const introPage = document.getElementById('intro-page');
 const dashboardPage = document.getElementById('dashboard-page');
 const settingsPage = document.getElementById('settings-page');
-const premiumPage = document.getElementById('premium-page');
 const settingsBackBtn = document.getElementById('settings-back-btn');
 
 // Expose page refs globally for settings.js/runtime debug
 window.__phishnetPages = {
     introPage,
     dashboardPage,
-    settingsPage,
-    premiumPage
+    settingsPage
 };
 
 // BUTTONS
@@ -196,8 +218,7 @@ const drawer = document.getElementById('menu-drawer');
 const whitelistModal = document.getElementById('whitelist-modal');
 const bulkScanModal = document.getElementById('bulk-scan-modal');
 const threatModal = document.getElementById('threat-modal');
-const premiumModal = document.getElementById('premium-modal');
-const premiumBackBtn = document.getElementById('premium-back-btn');
+// Premium modal/page removed; Get Premium opens pricing URL
 
 // MODAL INPUTS
 const loginEmailInput = document.getElementById('login-email');
@@ -248,7 +269,14 @@ function getUserInitials(name, email) {
     return 'U';
 }
 
-function createUserAvatar(name, email) {
+function createUserAvatar(name, email, imageData) {
+    if (imageData) {
+        const img = document.createElement('img');
+        img.src = imageData;
+        img.alt = 'User avatar';
+        img.className = 'avatar-image';
+        return img;
+    }
     const initials = getUserInitials(name, email);
     const avatar = document.createElement('div');
     avatar.className = 'avatar-circle';
@@ -256,11 +284,31 @@ function createUserAvatar(name, email) {
     return avatar;
 }
 
+// Load profile picture from chrome storage and merge into state
+async function hydrateProfilePictureFromStorage() {
+    const storedPicture = await new Promise((resolve) => {
+        chrome.storage.local.get([PROFILE_PICTURE_STORAGE_KEY], (result) => {
+            resolve(result[PROFILE_PICTURE_STORAGE_KEY]);
+        });
+    });
+    if (!storedPicture) return;
+    state.currentUser = state.currentUser || {};
+    state.currentUser.profilePicture = storedPicture;
+    saveState();
+    renderUserAvatar();
+}
+
 // LOAD STATE
 function loadState() {
     const stored = localStorage.getItem('phishNetState');
     if (stored) {
-        state = JSON.parse(stored);
+        try {
+            const parsed = JSON.parse(stored);
+            // Preserve object identity so window.__phishnetState stays in sync
+            Object.assign(state, parsed);
+        } catch (err) {
+            console.warn('⚠ Failed to parse stored state:', err);
+        }
     }
     updateUI();
 }
@@ -269,6 +317,9 @@ function loadState() {
 function saveState() {
     localStorage.setItem('phishNetState', JSON.stringify(state));
 }
+
+// Expose saveState so settings.js can persist profile/avatar updates
+window.saveState = saveState;
 
 // SHOW PAGE
 function showPage(page) {
@@ -368,9 +419,8 @@ function updateTimerDisplay() {
 function updateUI() {
     if (state.isLoggedIn && state.currentUser) {
         showPage(dashboardPage);
-        usernameDisplay.textContent = state.currentUser.name;
-        userAvatar.innerHTML = '';
-        userAvatar.appendChild(createUserAvatar(state.currentUser.name, state.currentUser.email));
+        usernameDisplay.textContent = state.currentUser.name || state.currentUser.fullName;
+        renderUserAvatar();
     } else {
         showPage(introPage);
         typewriter(taglineEl, 'Advanced Phishing Protection at Your Fingertips...', 60);
@@ -386,6 +436,51 @@ function updateUI() {
     if (state.isProtected && !state.alwaysOn && state.timerEndTime > Date.now()) {
         startTimer(true);
     }
+}
+
+// Render avatar in header using profile picture when available
+function renderUserAvatar() {
+    userAvatar.innerHTML = '';
+    if (!state.currentUser) return;
+    const avatarNode = createUserAvatar(
+        state.currentUser.name,
+        state.currentUser.email,
+        state.currentUser.profilePicture
+    );
+    userAvatar.appendChild(avatarNode);
+}
+
+// Allow other scripts to refresh avatar when profile picture changes
+window.refreshHeaderAvatar = renderUserAvatar;
+
+// Load settings script on-demand if needed and wait for init hook
+async function ensureSettingsInit(retries = 10, delay = 120) {
+    // If already available, return fast
+    if (typeof window.settingsPageInit === 'function') return true;
+
+    // Try to (re)load settings.js if not present or not yet marked loaded
+    const needsLoad = !window.__PHISHNET_SETTINGS_LOADED;
+    if (needsLoad) {
+        await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = `settings.js?v=${Date.now()}`;
+            s.onload = resolve;
+            s.onerror = reject;
+            document.body.appendChild(s);
+        }).catch(err => console.warn('⚠ Failed to load settings.js dynamically:', err));
+    }
+
+    for (let i = 0; i < retries; i++) {
+        if (typeof window.settingsPageInit === 'function') return true;
+        await new Promise(res => setTimeout(res, delay));
+    }
+    // Final fallback: use initializeSettingsPage if present, else noop to avoid repeated warnings
+    if (typeof window.initializeSettingsPage === 'function') {
+        window.settingsPageInit = window.initializeSettingsPage;
+        return true;
+    }
+    window.settingsPageInit = () => console.warn('⚠ settings.js not ready (using noop init)');
+    return true;
 }
 
 // AUTHENTICATION HANDLERS
@@ -467,6 +562,9 @@ async function handleLogin(email, password) {
                 firstName: response.data.user.firstName,
                 lastName: response.data.user.lastName
             };
+
+            // Rehydrate profile picture from storage so header shows immediately after login
+            await hydrateProfilePictureFromStorage();
             
             saveState();
             updateUI();
@@ -680,14 +778,14 @@ document.addEventListener('click', (e) => {
                     console.log('✓ Called showPage(settingsPage)');
                     console.log('✓ settingsPage classList after:', settingsPage.classList);
                     
-                    // Give a small delay to ensure page rendered
-                    setTimeout(() => {
-                        // Initialize settings page if it hasn't been already
-                        if (typeof window.settingsPageInit === 'function') {
+                    // Give a small delay to ensure page rendered and settings init available
+                    setTimeout(async () => {
+                        const ok = await ensureSettingsInit();
+                        if (ok) {
                             console.log('✓ Calling settingsPageInit()');
                             window.settingsPageInit();
                         } else {
-                            console.warn('⚠ settingsPageInit not found');
+                            console.warn('⚠ settingsPageInit not found after retry');
                         }
                     }, 100);
                 } else {
@@ -695,7 +793,7 @@ document.addEventListener('click', (e) => {
                 }
                 break;
             case 'premium':
-                showPage(premiumPage);
+                chrome.tabs.create({ url: PRICING_PAGE_URL });
                 break;
             case 'logout':
                 handleLogout();
@@ -724,28 +822,7 @@ document.addEventListener('click', (e) => {
     }
 }, true); // Use capture phase to ensure we catch the events
 
-// PREMIUM PAGE
-if (premiumBackBtn) {
-    premiumBackBtn.addEventListener('click', () => {
-        showPage(dashboardPage);
-    });
-}
-
-const premiumCta = document.querySelector('.premium-cta');
-if (premiumCta) {
-    premiumCta.addEventListener('click', () => {
-        showToast('Premium upgrade would be processed');
-    });
-}
-
-const modalUpgradeBtn = document.getElementById('modal-upgrade-btn');
-if (modalUpgradeBtn) {
-    modalUpgradeBtn.addEventListener('click', () => {
-        closeModal(premiumModal);
-        showPage(premiumPage);
-        showToast('Opening premium page...');
-    });
-}
+// Premium page removed; Get Premium now opens website pricing page directly
 
 // SETTINGS PAGE BACK BUTTON (ensure it always works)
 if (settingsBackBtn) {
@@ -790,6 +867,9 @@ if (threatSubmit) {
 
 // INITIALIZE
 async function initializeApp() {
+    // Load persisted UI state first (may include profile picture)
+    loadState();
+
     // Check if user is already logged in
     const token = await PhishNetAPI.getAccessToken();
     if (token) {
@@ -797,7 +877,9 @@ async function initializeApp() {
             const response = await PhishNetAPI.getUserProfile();
             state.isLoggedIn = true;
             state.currentUser = {
-                name: response.data.name,
+                name: response.data.firstName && response.data.lastName
+                    ? `${response.data.firstName} ${response.data.lastName}`
+                    : response.data.name || response.data.email,
                 email: response.data.email,
                 userId: response.data._id
             };
@@ -807,8 +889,28 @@ async function initializeApp() {
             chrome.storage.local.remove(['accessToken', 'refreshToken']);
         }
     }
-    
-    loadState();
+
+    // Pull stored profile picture if present
+    await hydrateProfilePictureFromStorage();
+
+    // Fetch profile picture/settings from backend if available
+    if (token && USE_SETTINGS_API) {
+        try {
+            const settings = await PhishNetAPI.getUserSettings();
+            if (settings?.data?.profilePicture) {
+                state.currentUser = state.currentUser || {};
+                state.currentUser.profilePicture = settings.data.profilePicture;
+                chrome.storage.local.set({ [PROFILE_PICTURE_STORAGE_KEY]: settings.data.profilePicture });
+                saveState();
+                renderUserAvatar();
+            }
+        } catch (error) {
+            console.warn('⚠ Could not fetch user settings/profile picture from backend:', error);
+        }
+    }
+
+    updateUI();
+    renderUserAvatar();
 }
 
 initializeApp();

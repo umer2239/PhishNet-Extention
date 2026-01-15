@@ -1,6 +1,23 @@
 // PhishNet Extension - Settings Page JavaScript
+// Wrapped to avoid redeclaration when the script is injected multiple times
+(function () {
+if (window.__PHISHNET_SETTINGS_LOADED) {
+    console.log('settings.js already loaded; skipping re-init');
+    return;
+}
+window.__PHISHNET_SETTINGS_LOADED = true;
 
 console.log('📄 settings.js loaded!');
+
+// Flag controlled by popup.js; use window-scoped to avoid re-declaration errors if script loads twice
+if (typeof window.USE_SETTINGS_API === 'undefined') {
+    window.USE_SETTINGS_API = window.__PHISHNET_USE_SETTINGS_API === true;
+}
+var USE_SETTINGS_API = window.USE_SETTINGS_API;
+
+// Pre-register init hooks so popup.js can find them even before bottom-of-file assignment
+window.settingsPageInit = window.settingsPageInit || function () { return initializeSettingsPage(); };
+window.initializeSettingsPage = window.initializeSettingsPage || initializeSettingsPage;
 
 // Use page references exposed by popup.js
 const { settingsPage, dashboardPage } = window.__phishnetPages || {};
@@ -15,6 +32,14 @@ const profilePicture = document.getElementById('profile-picture');
 const profileNameInput = document.getElementById('profile-name');
 const profileEmailInput = document.getElementById('profile-email');
 const profileSaveBtn = document.getElementById('profile-save-btn');
+
+// Cropper Elements
+const cropperModal = document.getElementById('cropper-modal');
+const cropperImage = document.getElementById('cropper-image');
+const cropperStage = document.getElementById('cropper-stage');
+const cropperZoom = document.getElementById('cropper-zoom');
+const cropperApplyBtn = document.getElementById('cropper-apply');
+const cropperCancelBtn = document.getElementById('cropper-cancel');
 
 // Scanning Settings
 const scanUrlsToggle = document.getElementById('scan-urls-toggle-page');
@@ -37,10 +62,106 @@ const safeSearchToggle = document.getElementById('safe-search-toggle');
 // Save All Settings Button
 const settingsSaveAllBtn = document.getElementById('settings-save-all-btn');
 
+// Prevent double-binding of listeners when init runs more than once
+let SETTINGS_LISTENERS_BOUND = false;
+
 // Storage Keys
 const SETTINGS_STORAGE_KEY = 'phishnetSettings';
 const USER_PROFILE_STORAGE_KEY = 'phishnetUserProfile';
 const PROFILE_PICTURE_STORAGE_KEY = 'phishnetProfilePicture';
+const CROP_STAGE_SIZE = 280;
+const CROP_EXPORT_SIZE = 240;
+
+const cropState = {
+    imageData: null,
+    imgNaturalWidth: 0,
+    imgNaturalHeight: 0,
+    scale: 1,
+    minScale: 1,
+    offsetX: 0,
+    offsetY: 0,
+    dragging: false,
+    dragStartX: 0,
+    dragStartY: 0
+};
+
+// Build a full name string from available fields
+function getFullName(user) {
+    if (!user) return '';
+    if (user.firstName || user.lastName) {
+        return `${user.firstName || ''} ${user.lastName || ''}`.trim();
+    }
+    return user.name || '';
+}
+
+// Split a full name into first/last for backend compatibility
+function splitName(fullName) {
+    const parts = (fullName || '').trim().split(/\s+/);
+    const firstName = parts.shift() || '';
+    const lastName = parts.join(' ') || '';
+    return { firstName, lastName };
+}
+
+// Cropper Helpers
+function updateCropperTransform() {
+    if (!cropperImage) return;
+    cropperImage.style.transform = `translate(-50%, -50%) translate(${cropState.offsetX}px, ${cropState.offsetY}px) scale(${cropState.scale})`;
+}
+
+function openCropper(imageData) {
+    if (!cropperModal || !cropperImage) return;
+    cropState.imageData = imageData;
+    cropperImage.src = imageData;
+    cropperModal.classList.add('open');
+
+    cropperImage.onload = () => {
+        cropState.imgNaturalWidth = cropperImage.naturalWidth;
+        cropState.imgNaturalHeight = cropperImage.naturalHeight;
+        const circleDiameter = CROP_EXPORT_SIZE;
+        const minScaleX = circleDiameter / cropState.imgNaturalWidth;
+        const minScaleY = circleDiameter / cropState.imgNaturalHeight;
+        cropState.minScale = Math.max(minScaleX, minScaleY);
+        // Default slightly zoomed-out feel (use minimum coverage scale)
+        cropState.scale = cropState.minScale;
+        cropState.offsetX = 0;
+        cropState.offsetY = 0;
+        if (cropperZoom) {
+            cropperZoom.min = cropState.minScale.toFixed(2);
+            cropperZoom.max = Math.max(3, (cropState.minScale * 3)).toFixed(2);
+            cropperZoom.value = cropState.scale.toFixed(2);
+        }
+        updateCropperTransform();
+    };
+}
+
+function closeCropper() {
+    if (!cropperModal) return;
+    cropperModal.classList.remove('open');
+    cropState.dragging = false;
+}
+
+function getCroppedDataUrl() {
+    if (!cropperImage) return null;
+    const canvas = document.createElement('canvas');
+    canvas.width = CROP_EXPORT_SIZE;
+    canvas.height = CROP_EXPORT_SIZE;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(CROP_EXPORT_SIZE / 2, CROP_EXPORT_SIZE / 2, CROP_EXPORT_SIZE / 2, 0, Math.PI * 2);
+    ctx.clip();
+
+    const drawWidth = cropState.imgNaturalWidth * cropState.scale;
+    const drawHeight = cropState.imgNaturalHeight * cropState.scale;
+    const drawX = (CROP_EXPORT_SIZE / 2) + cropState.offsetX - (drawWidth / 2);
+    const drawY = (CROP_EXPORT_SIZE / 2) + cropState.offsetY - (drawHeight / 2);
+
+    ctx.drawImage(cropperImage, drawX, drawY, drawWidth, drawHeight);
+    ctx.restore();
+    return canvas.toDataURL('image/png');
+}
 
 // Initialize Settings Page
 async function initializeSettingsPage() {
@@ -90,13 +211,17 @@ async function loadUserProfile() {
     }
 
     if (userData) {
-        if (userData.name) profileNameInput.value = userData.name;
-        if (userData.email) profileEmailInput.value = userData.email;
+        const fullName = getFullName(userData);
+        if (fullName) profileNameInput.value = fullName;
+        if (userData.email) {
+            profileEmailInput.value = userData.email;
+            profileEmailInput.readOnly = true;
+        }
 
         // Store profile locally for future loads
         await chrome.storage.local.set({
             [USER_PROFILE_STORAGE_KEY]: {
-                name: userData.name || '',
+                name: fullName,
                 email: userData.email || ''
             }
         });
@@ -117,18 +242,63 @@ async function loadUserProfile() {
         profilePicture.innerHTML = '';
         profilePicture.appendChild(img);
         console.log('✓ Profile picture loaded');
+        // Sync to popup state and header avatar
+        if (window.__phishnetState) {
+            window.__phishnetState.currentUser = {
+                ...(window.__phishnetState.currentUser || {}),
+                profilePicture: stored
+            };
+            if (typeof window.saveState === 'function') {
+                window.saveState();
+            }
+            if (typeof window.refreshHeaderAvatar === 'function') {
+                window.refreshHeaderAvatar();
+            }
+        }
     }
 }
 
 // Load Settings from Storage
 async function loadSettings() {
     console.log('⚙️ Loading settings from storage...');
-    
-    const stored = await new Promise((resolve) => {
+    let stored = {};
+
+    // Try backend first (only if flag enabled)
+    if (USE_SETTINGS_API) {
+        try {
+            const response = await PhishNetAPI.getUserSettings();
+            if (response?.data) {
+                stored = response.data.settings || {};
+                const backendPicture = response.data.profilePicture;
+                if (backendPicture) {
+                    await chrome.storage.local.set({ [PROFILE_PICTURE_STORAGE_KEY]: backendPicture });
+                    if (window.__phishnetState) {
+                        window.__phishnetState.currentUser = {
+                            ...(window.__phishnetState.currentUser || {}),
+                            profilePicture: backendPicture
+                        };
+                        if (typeof window.saveState === 'function') window.saveState();
+                        if (typeof window.refreshHeaderAvatar === 'function') window.refreshHeaderAvatar();
+                    }
+                    // Reflect in UI immediately
+                    const img = document.createElement('img');
+                    img.src = backendPicture;
+                    profilePicture.innerHTML = '';
+                    profilePicture.appendChild(img);
+                }
+            }
+        } catch (error) {
+            console.warn('⚠ Could not load settings from backend, will use local storage:', error);
+        }
+    }
+
+    // Fallback/local merge
+    const storedLocal = await new Promise((resolve) => {
         chrome.storage.local.get([SETTINGS_STORAGE_KEY], (result) => {
             resolve(result[SETTINGS_STORAGE_KEY] || {});
         });
     });
+    stored = { ...storedLocal, ...stored }; // backend wins on overlap
     
     // Apply saved settings to toggles with defaults
     scanUrlsToggle.checked = stored.scanUrls !== undefined ? stored.scanUrls : true;
@@ -150,6 +320,9 @@ async function loadSettings() {
 
 // Setup Event Listeners
 function setupSettingsEventListeners() {
+    if (SETTINGS_LISTENERS_BOUND) return;
+    SETTINGS_LISTENERS_BOUND = true;
+
     // Back button
     if (settingsBackBtn) {
         settingsBackBtn.addEventListener('click', () => {
@@ -174,6 +347,56 @@ function setupSettingsEventListeners() {
         profilePictureInput.addEventListener('change', (e) => {
             handleProfilePictureUpload(e);
         });
+    }
+
+    if (cropperCancelBtn) {
+        cropperCancelBtn.addEventListener('click', () => {
+            closeCropper();
+            if (profilePictureInput) profilePictureInput.value = '';
+        });
+    }
+
+    if (cropperApplyBtn) {
+        cropperApplyBtn.addEventListener('click', () => {
+            applyCroppedPhoto();
+        });
+    }
+
+    if (cropperZoom) {
+        cropperZoom.addEventListener('input', () => {
+            const nextScale = Math.max(cropState.minScale, parseFloat(cropperZoom.value || '1'));
+            cropState.scale = nextScale;
+            updateCropperTransform();
+        });
+    }
+
+    if (cropperStage) {
+        cropperStage.addEventListener('pointerdown', (e) => {
+            handleCropperPointerDown(e);
+            cropperStage.setPointerCapture(e.pointerId);
+        });
+        cropperStage.addEventListener('pointermove', (e) => {
+            handleCropperPointerMove(e);
+        });
+        cropperStage.addEventListener('pointerup', (e) => {
+            handleCropperPointerUp();
+            cropperStage.releasePointerCapture(e.pointerId);
+        });
+        cropperStage.addEventListener('pointercancel', () => {
+            handleCropperPointerUp();
+        });
+        cropperStage.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = -e.deltaY;
+            const step = delta > 0 ? 0.05 : -0.05;
+            const maxScale = Math.max(3, cropState.minScale * 3);
+            const nextScale = Math.min(maxScale, Math.max(cropState.minScale, cropState.scale + step));
+            cropState.scale = nextScale;
+            if (cropperZoom) {
+                cropperZoom.value = cropState.scale.toFixed(2);
+            }
+            updateCropperTransform();
+        }, { passive: false });
     }
     
     // Profile save button
@@ -211,21 +434,67 @@ function handleProfilePictureUpload(event) {
     const reader = new FileReader();
     reader.onload = (e) => {
         const imageData = e.target.result;
-        
-        // Display the image
-        const img = document.createElement('img');
-        img.src = imageData;
-        profilePicture.innerHTML = '';
-        profilePicture.appendChild(img);
-        
-        // Store locally (we'll save to backend when user clicks Save Profile)
-        chrome.storage.local.set({
-            [PROFILE_PICTURE_STORAGE_KEY]: imageData
-        });
-        
-        console.log('✓ Profile picture selected');
+        openCropper(imageData);
+        console.log('✓ Profile picture selected, opening cropper');
     };
     reader.readAsDataURL(file);
+}
+
+async function applyCroppedPhoto() {
+    const finalImage = getCroppedDataUrl();
+    if (!finalImage) {
+        showToast('Could not process image');
+        return;
+    }
+
+    const img = document.createElement('img');
+    img.src = finalImage;
+    profilePicture.innerHTML = '';
+    profilePicture.appendChild(img);
+
+    await chrome.storage.local.set({
+        [PROFILE_PICTURE_STORAGE_KEY]: finalImage
+    });
+
+    if (window.__phishnetState) {
+        window.__phishnetState.currentUser = {
+            ...(window.__phishnetState.currentUser || {}),
+            profilePicture: finalImage
+        };
+        if (typeof window.saveState === 'function') {
+            window.saveState();
+        }
+        if (typeof window.refreshHeaderAvatar === 'function') {
+            window.refreshHeaderAvatar();
+        }
+    }
+
+    closeCropper();
+    if (profilePictureInput) profilePictureInput.value = '';
+    showToast('Profile photo updated');
+    console.log('✓ Profile photo cropped and saved');
+}
+
+function handleCropperPointerDown(e) {
+    if (!cropState) return;
+    cropState.dragging = true;
+    cropState.dragStartX = e.clientX;
+    cropState.dragStartY = e.clientY;
+}
+
+function handleCropperPointerMove(e) {
+    if (!cropState.dragging) return;
+    const dx = e.clientX - cropState.dragStartX;
+    const dy = e.clientY - cropState.dragStartY;
+    cropState.offsetX += dx;
+    cropState.offsetY += dy;
+    cropState.dragStartX = e.clientX;
+    cropState.dragStartY = e.clientY;
+    updateCropperTransform();
+}
+
+function handleCropperPointerUp() {
+    cropState.dragging = false;
 }
 
 // Save Profile Changes
@@ -237,33 +506,55 @@ async function saveProfileChanges() {
             showToast('Please enter your name');
             return;
         }
+
+        // Basic length guardrail (UI level)
+        if (name.length < 2) {
+            showToast('Name must be at least 2 characters');
+            return;
+        }
+
+        // Enforce schema requirements (min length 2 for first/last)
+        const existing = window.__phishnetState?.currentUser || {};
+        let { firstName, lastName } = splitName(name);
+        if (!firstName || firstName.length < 2) firstName = existing.firstName || 'User';
+        if (!lastName || lastName.length < 2) lastName = existing.lastName || 'User';
         
         // Show saving state
         profileSaveBtn.disabled = true;
         profileSaveBtn.textContent = 'Saving...';
         
-        // Prepare update data
+        // Prepare update data for backend
         const updateData = {
-            name: name
+            firstName,
+            lastName
         };
         
         // Try to update via API
         try {
-            const response = await PhishNetAPI.request('/users/me', {
+            const response = await PhishNetAPI.request('/users/profile', {
                 method: 'PUT',
                 body: JSON.stringify(updateData)
             });
             
             console.log('✓ Profile updated on server:', response);
+            // Prefer server-returned names if available
+            if (response?.data) {
+                const updated = response.data;
+                firstName = updated.firstName || firstName;
+                lastName = updated.lastName || lastName;
+            }
         } catch (error) {
             console.warn('⚠ Could not update profile on server:', error);
             // Continue - we'll still save locally
         }
         
         // Store profile locally
+        const fullName = `${firstName} ${lastName}`.trim();
         const profile = {
-            name: name,
-            email: profileEmailInput.value
+            name: fullName,
+            email: profileEmailInput.value,
+            firstName,
+            lastName
         };
         
         await chrome.storage.local.set({
@@ -274,20 +565,45 @@ async function saveProfileChanges() {
         if (window.__phishnetState) {
             window.__phishnetState.currentUser = {
                 ...(window.__phishnetState.currentUser || {}),
-                name: name,
-                email: profileEmailInput.value
+                name: fullName,
+                email: profileEmailInput.value,
+                firstName,
+                lastName
             };
             if (typeof window.saveState === 'function') {
                 window.saveState();
             }
+            if (typeof window.refreshHeaderAvatar === 'function') {
+                window.refreshHeaderAvatar();
+            }
         }
         
-        showToast('Profile saved successfully! ✓');
+        showToast('Changes saved successfully');
         console.log('✓ Profile changes saved');
+
+        // Persist profile picture to backend as a reliability fallback (only if enabled)
+        if (USE_SETTINGS_API) {
+            try {
+                const storedPicture = await new Promise((resolve) => {
+                    chrome.storage.local.get([PROFILE_PICTURE_STORAGE_KEY], (result) => {
+                        resolve(result[PROFILE_PICTURE_STORAGE_KEY]);
+                    });
+                });
+
+                await PhishNetAPI.request('/users/settings', {
+                    method: 'POST',
+                    body: JSON.stringify({ profilePicture: storedPicture })
+                });
+                console.log('✓ Profile picture synced with backend');
+            } catch (syncError) {
+                console.warn('⚠ Could not sync profile picture with backend:', syncError);
+            }
+        }
         
     } catch (error) {
         console.error('❌ Error saving profile:', error);
-        showToast('Error saving profile. Please try again.');
+        const message = error?.message || 'Error saving profile. Please try again.';
+        showToast(message);
     } finally {
         profileSaveBtn.disabled = false;
         profileSaveBtn.textContent = 'Save Profile Changes';
@@ -330,16 +646,24 @@ async function saveAllSettings() {
             [SETTINGS_STORAGE_KEY]: settings
         });
         
-        // Try to sync with backend
-        try {
-            const response = await PhishNetAPI.request('/users/settings', {
-                method: 'POST',
-                body: JSON.stringify(settings)
-            });
-            console.log('✓ Settings synced with backend:', response);
-        } catch (error) {
-            console.warn('⚠ Could not sync settings with backend:', error);
-            // Settings are still saved locally, that's okay
+        // Try to sync with backend (only if enabled)
+        if (USE_SETTINGS_API) {
+            try {
+                const storedPicture = await new Promise((resolve) => {
+                    chrome.storage.local.get([PROFILE_PICTURE_STORAGE_KEY], (result) => {
+                        resolve(result[PROFILE_PICTURE_STORAGE_KEY]);
+                    });
+                });
+
+                const response = await PhishNetAPI.request('/users/settings', {
+                    method: 'POST',
+                    body: JSON.stringify({ settings, profilePicture: storedPicture })
+                });
+                console.log('✓ Settings synced with backend:', response);
+            } catch (error) {
+                console.warn('⚠ Could not sync settings with backend:', error);
+                // Settings are still saved locally, that's okay
+            }
         }
         
         showToast('All settings saved successfully! ✓');
@@ -366,5 +690,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Export initialization function for use by popup.js
-window.settingsPageInit = initializeSettingsPage;
+// Export initialization function for use by popup.js (and ensure a stable reference)
+window.initializeSettingsPage = initializeSettingsPage;
+window.settingsPageInit = window.settingsPageInit || initializeSettingsPage;
+
+})();

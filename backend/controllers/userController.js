@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const UserSettings = require('../models/UserSettings');
 
 // @desc    Get current user profile
 // @route   GET /api/v1/users/me
@@ -27,17 +28,88 @@ exports.getCurrentUser = async (req, res, next) => {
   }
 };
 
-// @desc    Update user profile
+// @desc    Get user settings (including profile picture)
+// @route   GET /api/v1/users/settings
+// @access  Private
+exports.getSettings = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const settingsDoc = await UserSettings.findOne({ userId });
+
+    res.status(200).json({
+      success: true,
+      data: settingsDoc
+        ? { settings: settingsDoc.settings || {}, profilePicture: settingsDoc.profilePicture || null }
+        : { settings: {}, profilePicture: null }
+    });
+  } catch (error) {
+    console.error('Get settings error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error fetching settings'
+    });
+  }
+};
+
+// @desc    Upsert user settings and optional profile picture
+// @route   POST /api/v1/users/settings
+// @access  Private
+exports.saveSettings = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { settings = {}, profilePicture } = req.body;
+
+    const upserted = await UserSettings.findOneAndUpdate(
+      { userId },
+      {
+        userId,
+        settings,
+        ...(profilePicture !== undefined ? { profilePicture } : {}),
+        updatedAt: new Date()
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+
+    // Optionally mirror profile picture onto User if provided
+    if (profilePicture !== undefined) {
+      await User.findByIdAndUpdate(userId, { updatedAt: new Date() });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Settings saved successfully',
+      data: {
+        settings: upserted.settings,
+        profilePicture: upserted.profilePicture
+      }
+    });
+  } catch (error) {
+    console.error('Save settings error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error saving settings'
+    });
+  }
+};
+
+// @desc    Update user profile (name fields)
 // @route   PUT /api/v1/users/profile
 // @access  Private
 exports.updateProfile = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { name } = req.body;
+    const { firstName, lastName } = req.body;
+
+    const updates = {
+      updatedAt: new Date()
+    };
+
+    if (firstName) updates.firstName = firstName.trim();
+    if (lastName) updates.lastName = lastName.trim();
 
     const user = await User.findByIdAndUpdate(
       userId,
-      { name, updatedAt: new Date() },
+      updates,
       { new: true, runValidators: true }
     );
 

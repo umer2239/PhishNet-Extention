@@ -419,160 +419,37 @@
         </footer>
     </div>
 
-    <!-- PREMIUM PAGE -->
-    <div id="premium-page" class="page">
-        <div class="cyber-bg">
-            <div class="cyber-grid"></div>
-            <div class="cyber-orbs">
-                <div class="orb orb-1"></div>
-                <div class="orb orb-2"></div>
-                <div class="orb orb-3"></div>
-            </div>
-            <div class="cyber-lines"></div>
-        </div>
+    <!-- Premium page removed; Get Premium now opens pricing site directly -->
 
-        <header class="header">
-            <div class="header-left">
-                <button id="premium-back-btn" class="icon-btn" title="Back to Dashboard">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.828 12l5.364 5.364-1.414 1.414L9 13.414l-5.364 5.364-1.414-1.414L7.586 12l-5.364-5.364 1.414-1.414L9 10.586l5.364-5.364 1.414 1.414z"></path></svg>
-                </button>
-                <h1 class="logo">Premium</h1>
-            </div>
-        </header>
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast"></div>
 
-        <main class="premium-main">
-            <div class="premium-hero">
-                <h2>PhishNet Premium</h2>
-                <p class="premium-tagline">Unlock Advanced Protection</p>
-            </div>
-
-            <div class="premium-pricing-grid">
-                <div class="pricing-card">
-                    <div class="pricing-period">Free</div>
-                    <div class="pricing-amount">$0</div>
-                    <div class="pricing-interval">/forever</div>
-                    <button class="btn btn-secondary full-width" style="margin-top: 16px;">Current Plan</button>
-                    <div class="pricing-features">
-                        <div class="pricing-feature">Limited scans</div>
-                        <div class="pricing-feature">Basic protection</div>
-                    </div>
-                </div>
-                <div class="pricing-card featured">
-                    <div class="pricing-badge">POPULAR</div>
-                    <div class="pricing-period">Monthly</div>
-                    <div class="pricing-amount">$9.99</div>
-                    <div class="pricing-interval">/month</div>
-                    <button class="btn btn-primary full-width" style="margin-top: 16px;">Subscribe</button>
-                    <div class="pricing-features">
-                        <div class="pricing-feature">Unlimited scans</div>
-                        <div class="pricing-feature">Advanced detection</div>
-                        <div class="pricing-feature">Priority support</div>
-                        <div class="pricing-feature">Real-time protection</div>
-                    </div>
-                </div>
-                <div class="pricing-card">
-                    <div class="pricing-badge">BEST VALUE</div>
-                    <div class="pricing-period">Annually</div>
-                    <div class="pricing-amount">$99</div>
-                    <div class="pricing-interval">/year</div>
-                    <div class="pricing-save">Save 17%</div>
-                    <button class="btn btn-primary full-width" style="margin-top: 16px;">Subscribe</button>
-                    <div class="pricing-features">
-                        <div class="pricing-feature">Unlimited scans</div>
-                        <div class="pricing-feature">Advanced detection</div>
-                        <div class="pricing-feature">Priority support</div>
-                        <div class="pricing-feature">Real-time protection</div>
-                        <div class="pricing-feature">Dark web monitoring</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="premium-features">
-                <h3>Premium Features</h3>
-                <ul>
-                    <li>
-                        <span class="feature-icon">✓</span>
-                        <div>
-                            <div class="feature-name">Advanced Threat Detection</div>
-                            <div class="feature-desc">AI-powered detection of sophisticated phishing</div>
-                        </div>
-                    </li>
-                    <li>
-                        <span class="feature-icon">✓</span>
-                        <div>
-                            <div class="feature-name">Real-Time Protection</div>
-                            <div class="feature-desc">Instant blocking of malicious sites</div>
-                        </div>
-                    </li>
-                    <li>
-                        <span class="feature-icon">✓</span>
-                        <div>
-                            <div class="feature-name">Priority Support</div>
-                            <div class="feature-desc">24/7 dedicated support team</div>
-                        </div>
-                    </li>
-                    <li>
-                        <span class="feature-icon">✓</span>
-                        <div>
-                            <div class="feature-name">Dark Web Monitoring</div>
-                            <div class="feature-desc">Monitor dark web for your credentials</div>
-                        </div>
-                    </li>
-                    <li>
-                        <span class="feature-icon">✓</span>
-                        <div>
-                            <div class="feature-name">Advanced Analytics</div>
-                            <div class="feature-desc">Detailed reports and threat insights</div>
-                        </div>
-                    </li>
-                    <li>
-                        <span class="feature-icon">✓</span>
-                        <div>
-                            <div class="feature-name">Multi-Device Sync</div>
-                            <div class="feature-desc">Protect all your devices at once</div>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-
-            <button class="btn btn-primary premium-cta">Upgrade to Premium</button>
-
-            <div class="premium-footer">
-                <p>14-day free trial • Cancel anytime • No credit card required</p>
-            </div>
-        </main>
-
-        <footer class="footer">
-            <p>By using the extension you agree with <a href="#">Terms and Conditions</a> and <a href="#">Privacy Policy</a></p>
-        </footer>
-    </div>
-
-    <!-- PREMIUM MODAL (for button in menu) -->
-    <div id="premium-modal" class="modal">
+    <!-- IMAGE CROP MODAL -->
+    <div id="cropper-modal" class="modal">
         <div class="modal-backdrop"></div>
-        <div class="modal-content card">
+        <div class="modal-content card cropper-card">
             <header class="modal-header">
-                <h2>PhishNet Premium</h2>
+                <h2>Adjust Profile Photo</h2>
                 <button class="icon-btn close-modal" title="Close Modal">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
                 </button>
             </header>
-            <div class="modal-body">
-                <h3 style="color: var(--color-accent); margin: 0 0 12px 0;">Upgrade to Premium</h3>
-                <ul style="list-style: none; padding: 0; margin-bottom: 16px;">
-                    <li style="padding: 8px 0; border-bottom: 1px solid var(--color-border);">✓ Advanced threat detection</li>
-                    <li style="padding: 8px 0; border-bottom: 1px solid var(--color-border);">✓ Real-time protection</li>
-                    <li style="padding: 8px 0; border-bottom: 1px solid var(--color-border);">✓ Priority support</li>
-                    <li style="padding: 8px 0;">✓ Dark web monitoring</li>
-                </ul>
-                <p style="font-size: 0.9rem; color: var(--color-accent); font-weight: 600; margin: 12px 0;">$9.99/month or $99/year</p>
-                <button id="modal-upgrade-btn" class="btn btn-primary full-width">Upgrade Now</button>
+            <div class="modal-body cropper-body">
+                <div class="cropper-stage" id="cropper-stage">
+                    <img id="cropper-image" alt="Crop preview">
+                    <div class="cropper-mask"></div>
+                </div>
+                <div class="cropper-controls">
+                    <label for="cropper-zoom">Zoom</label>
+                    <input type="range" id="cropper-zoom" min="1" max="3" step="0.01" value="1">
+                </div>
+                <div class="cropper-actions">
+                    <button id="cropper-cancel" class="btn btn-secondary">Cancel</button>
+                    <button id="cropper-apply" class="btn btn-primary">Save Photo</button>
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="toast"></div>
 
     <script src="popup.js"></script>
     <script src="settings.js"></script>
