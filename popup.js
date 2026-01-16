@@ -256,6 +256,7 @@ let state = {
 window.__phishnetState = state;
 
 let timerInterval = null;
+let typewriterRun = false;
 
 function getUserInitials(name, email) {
     if (name && name.trim()) {
@@ -423,7 +424,10 @@ function updateUI() {
         renderUserAvatar();
     } else {
         showPage(introPage);
-        typewriter(taglineEl, 'Advanced Phishing Protection at Your Fingertips...', 60);
+        if (!typewriterRun) {
+            typewriterRun = true;
+            typewriter(taglineEl, 'Advanced Phishing Protection at Your Fingertips...', 60);
+        }
     }
 
     protectionDial.setAttribute('aria-checked', state.isProtected);

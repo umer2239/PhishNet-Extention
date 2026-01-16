@@ -3,6 +3,12 @@
   "name": "PhishNet Protection",
   "version": "1.0.1",
   "description": "Advanced phishing protection at your fingertips",
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
   "permissions": [
     "storage",
     "notifications",
@@ -16,6 +22,7 @@
   ],
   "action": {
     "default_popup": "index.html",
-    "default_title": "PhishNet Protection"
+    "default_title": "PhishNet Protection",
+    "default_icon": "icon.png"
   }
 }
