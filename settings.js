@@ -182,15 +182,21 @@ async function initializeSettingsPage() {
 // Load User Profile
 async function loadUserProfile() {
     let userData = null;
-    try {
-        console.log('📋 Loading user profile...');
-        const profile = await PhishNetAPI.getUserProfile();
-        if (profile && profile.data) {
-            userData = profile.data;
-            console.log('✓ User profile loaded from API');
+    console.log('📋 Loading user profile...');
+
+    // Only attempt API call if the API wrapper is available and settings API usage is enabled
+    if (typeof PhishNetAPI !== 'undefined' && USE_SETTINGS_API) {
+        try {
+            const profile = await PhishNetAPI.getUserProfile();
+            if (profile && profile.data) {
+                userData = profile.data;
+                console.log('✓ User profile loaded from API');
+            }
+        } catch (error) {
+            console.warn('⚠ Could not load profile from API, trying local storage:', error);
         }
-    } catch (error) {
-        console.warn('⚠ Could not load profile from API, trying local storage:', error);
+    } else {
+        console.log('ℹ Skipping API profile load (API unavailable or disabled), using local storage/popup state');
     }
 
     if (!userData) {

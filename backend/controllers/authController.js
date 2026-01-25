@@ -298,16 +298,9 @@ exports.login = async (req, res, next) => {
     console.log(`[${requestId}] Normalized email: ${normalizedEmail}`);
     console.log(`[${requestId}] Querying database for email: ${normalizedEmail}`);
     
-    // Debug: Count total users in database
+    // Debug: (redacted) show only user count for diagnostics without listing PII
     const totalUsers = await User.countDocuments();
     console.log(`[${requestId}] Total users in database: ${totalUsers}`);
-    
-    // Debug: List all users' emails
-    if (totalUsers > 0 && totalUsers <= 10) {
-      const allUsers = await User.find().select('email firstName lastName');
-      console.log(`[${requestId}] Users in database:`);
-      allUsers.forEach(u => console.log(`[${requestId}]   - ${u.email} (${u.firstName} ${u.lastName})`));
-    }
     
     // FIXED: Use .select('+passwordHash') to get the password field
     const user = await User.findOne({ email: normalizedEmail }).select('+passwordHash');

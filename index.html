@@ -65,8 +65,13 @@
                 <h1 class="logo">PhishNet</h1>
             </div>
             <div class="header-right">
-                <span id="user-avatar" class="user-avatar" title="User Profile"></span>
-                <span id="username-display" class="username"></span>
+                <div class="user-info">
+                    <span id="user-avatar" class="user-avatar" title="User Profile"></span>
+                    <div class="user-text">
+                        <span id="username-display" class="username"></span>
+                        <span id="user-email-display" class="user-email"></span>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -106,10 +111,10 @@
             <ul class="menu-list">
                 <li><button class="menu-btn menu-dashboard" data-action="dashboard">Dashboard</button></li>
                 <li><hr></li>
-                <li><button class="menu-btn" data-action="report-threat">Report a Threat</button></li>
-                <li><button class="menu-btn" data-action="bulk-scan">Bulk Scan URLs</button></li>
+                <li><button class="menu-btn" data-action="top-threats">Top Threats</button></li>
+                <li><button class="menu-btn" data-action="security-insights">Security Insights</button></li>
+                <li><button class="menu-btn" data-action="learn-security">Learn About Security</button></li>
                 <li><hr></li>
-                <li><button class="menu-btn" data-action="whitelist">Manage Whitelist</button></li>
                 <li><button class="menu-btn" data-action="settings">Extension Settings (v1.0.1)</button></li>
                 <li><button class="menu-btn" data-action="premium">Get Premium</button></li>
                 <li><a href="#" class="menu-link">Help & Support</a></li>
@@ -179,74 +184,42 @@
         </div>
     </div>
 
-    <!-- WHITELIST MODAL -->
-    <div id="whitelist-modal" class="modal">
+    <!-- TOP THREATS MODAL -->
+    <div id="top-threats-modal" class="modal">
         <div class="modal-backdrop"></div>
         <div class="modal-content card">
             <header class="modal-header">
-                <h2>Manage Whitelist</h2>
+                <h2>Top Threats</h2>
                 <button class="icon-btn close-modal" title="Close Modal">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
                 </button>
             </header>
-            <div class="modal-body">
-                <p>Add domains you trust to bypass scanning.</p>
-                <div class="input-group">
-                    <input type="text" id="whitelist-input" placeholder="e.g., mybank.com">
-                    <button id="whitelist-add" class="btn btn-primary">Add</button>
-                </div>
-                <ul id="whitelist-list" class="item-list"></ul>
+            <div class="modal-body" id="top-threats-body">
+                <p>High-priority recent threats:</p>
+                <div id="top-threats-list" class="top-threats-list"></div>
             </div>
         </div>
     </div>
 
-    <!-- BULK SCAN MODAL -->
-    <div id="bulk-scan-modal" class="modal">
+    <!-- SECURITY INSIGHTS MODAL -->
+    <div id="security-insights-modal" class="modal">
         <div class="modal-backdrop"></div>
         <div class="modal-content card">
             <header class="modal-header">
-                <h2>Bulk Scan URLs</h2>
+                <h2>Security Insights</h2>
                 <button class="icon-btn close-modal" title="Close Modal">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
                 </button>
             </header>
-            <div class="modal-body">
-                <p>Enter URLs to scan, one per line:</p>
-                <textarea id="bulk-scan-input" placeholder="https://example.com&#10;https://another-site.com" style="width: 100%; height: 120px; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; background-color: var(--color-bg-primary); color: var(--color-text-primary); font-family: monospace; resize: none;"></textarea>
-                <button id="bulk-scan-submit" class="btn btn-primary full-width" style="margin-top: 12px;">Scan URLs</button>
-            </div>
-        </div>
-    </div>
+            <div class="modal-body" id="security-insights-body">
+                <p>Recent alerts (Malicious / Suspicious only):</p>
+                <div id="insights-list" class="insights-list"></div>
 
-    <!-- THREAT REPORT MODAL -->
-    <div id="threat-modal" class="modal">
-        <div class="modal-backdrop"></div>
-        <div class="modal-content card">
-            <header class="modal-header">
-                <h2>Report a Threat</h2>
-                <button class="icon-btn close-modal" title="Close Modal">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95 1.414-1.414z"></path></svg>
-                </button>
-            </header>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="threat-url">Suspicious URL</label>
-                    <input type="text" id="threat-url" placeholder="https://suspicious-site.com">
+                <hr>
+                <h3 style="margin:6px 0 4px 0; font-size:0.95rem;">Simple Security Tips</h3>
+                <div id="security-tips" class="security-tips">
+                    <!-- Tips populated by popup.js -->
                 </div>
-                <div class="form-group">
-                    <label for="threat-type">Type of Threat</label>
-                    <select id="threat-type" style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; background-color: var(--color-bg-primary); color: var(--color-text-primary); font-family: Inter, sans-serif;">
-                        <option value="phishing">Phishing</option>
-                        <option value="malware">Malware</option>
-                        <option value="spam">Spam</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="threat-desc">Description</label>
-                    <textarea id="threat-desc" placeholder="Describe the threat..." style="width: 100%; height: 80px; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; background-color: var(--color-bg-primary); color: var(--color-text-primary); font-family: Inter, sans-serif; resize: none;"></textarea>
-                </div>
-                <button id="threat-submit" class="btn btn-primary full-width">Submit Report</button>
             </div>
         </div>
     </div>

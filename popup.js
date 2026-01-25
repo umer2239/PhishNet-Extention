@@ -215,9 +215,8 @@ const taglineEl = document.getElementById('tagline');
 // MODALS
 const loginModal = document.getElementById('login-modal');
 const drawer = document.getElementById('menu-drawer');
-const whitelistModal = document.getElementById('whitelist-modal');
-const bulkScanModal = document.getElementById('bulk-scan-modal');
-const threatModal = document.getElementById('threat-modal');
+const topThreatsModal = document.getElementById('top-threats-modal');
+const securityInsightsModal = document.getElementById('security-insights-modal');
 // Premium modal/page removed; Get Premium opens pricing URL
 
 // MODAL INPUTS
@@ -230,10 +229,9 @@ const dialStatus = document.getElementById('dial-status');
 const timerDisplay = document.getElementById('timer-display');
 const usernameDisplay = document.getElementById('username-display');
 const userAvatar = document.getElementById('user-avatar');
+const userEmailDisplay = document.getElementById('user-email-display');
 const toast = document.getElementById('toast');
-const whitelistInput = document.getElementById('whitelist-input');
-const whitelistAddBtn = document.getElementById('whitelist-add');
-const whitelistList = document.getElementById('whitelist-list');
+// (removed whitelist/bulk-scan/threat controls — not supported in extension)
 
 // STATE MANAGEMENT (keep localStorage for UI state only, not user data)
 let state = {
@@ -421,9 +419,16 @@ function updateUI() {
     if (state.isLoggedIn && state.currentUser) {
         showPage(dashboardPage);
         usernameDisplay.textContent = state.currentUser.name || state.currentUser.fullName;
+        if (userEmailDisplay) {
+            const emailText = state.currentUser.email || '';
+            userEmailDisplay.textContent = emailText;
+            // set title so hovering shows full email if it wraps/truncates
+            userEmailDisplay.title = emailText;
+        }
         renderUserAvatar();
     } else {
         showPage(introPage);
+        if (userEmailDisplay) userEmailDisplay.textContent = '';
         if (!typewriterRun) {
             typewriterRun = true;
             typewriter(taglineEl, 'Advanced Phishing Protection at Your Fingertips...', 60);
@@ -633,37 +638,7 @@ function handleAlwaysOnChange() {
     updateUI();
 }
 
-// WHITELIST HANDLERS
-function addToWhitelist() {
-    const domain = whitelistInput.value.trim();
-    if (domain && !state.whitelist.includes(domain)) {
-        state.whitelist.push(domain);
-        saveState();
-        whitelistInput.value = '';
-        renderWhitelist();
-        showToast(`Added ${domain} to whitelist`);
-    }
-}
-
-function removeFromWhitelist(domain) {
-    state.whitelist = state.whitelist.filter(d => d !== domain);
-    saveState();
-    renderWhitelist();
-    showToast(`Removed ${domain} from whitelist`);
-}
-
-function renderWhitelist() {
-    whitelistList.innerHTML = '';
-    state.whitelist.forEach(domain => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-            <span>${domain}</span>
-            <button aria-label="Remove ${domain}">✕</button>
-        `;
-        li.querySelector('button').addEventListener('click', () => removeFromWhitelist(domain));
-        whitelistList.appendChild(li);
-    });
-}
+// (Whitelist, bulk-scan and threat reporting removed from extension)
 
 // LOGOUT
 async function handleLogout() {
@@ -742,7 +717,7 @@ document.querySelectorAll('.close-modal').forEach(btn => {
 });
 
 // EVENT LISTENERS - MENU ITEMS (using event delegation)
-document.addEventListener('click', (e) => {
+document.addEventListener('click', async (e) => {
     // Handle menu buttons
     if (e.target.closest('.menu-btn')) {
         const btn = e.target.closest('.menu-btn');
@@ -762,15 +737,24 @@ document.addEventListener('click', (e) => {
                     console.error('Error opening dashboard:', error);
                 }
                 break;
-            case 'report-threat':
-                openModal(threatModal);
+            case 'top-threats':
+                try {
+                    await populateTopThreats();
+                } catch (err) { console.warn('populateTopThreats error', err); }
+                openModal(topThreatsModal);
                 break;
-            case 'bulk-scan':
-                openModal(bulkScanModal);
+            case 'security-insights':
+                try {
+                    await populateSecurityInsights();
+                } catch (err) { console.warn('populateSecurityInsights error', err); }
+                openModal(securityInsightsModal);
                 break;
-            case 'whitelist':
-                renderWhitelist();
-                openModal(whitelistModal);
+            case 'learn-security':
+                try {
+                    chrome.tabs.create({ url: `${WEBSITE_URL}/blog.html` });
+                } catch (error) {
+                    window.open(`${WEBSITE_URL}/blog.html`, '_blank');
+                }
                 break;
             case 'settings':
                 // Show full settings page instead of modal
@@ -835,37 +819,177 @@ if (settingsBackBtn) {
     });
 }
 
-// EVENT LISTENERS - WHITELIST
-whitelistAddBtn.addEventListener('click', addToWhitelist);
-whitelistInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addToWhitelist();
-});
-
-// BULK SCAN HANDLER
-const bulkScanSubmit = document.getElementById('bulk-scan-submit');
-if (bulkScanSubmit) {
-    bulkScanSubmit.addEventListener('click', () => {
-        const input = document.getElementById('bulk-scan-input');
-        const urls = input.value.split('\n').filter(url => url.trim());
-        if (urls.length > 0) {
-            showToast(`Scanning ${urls.length} URL(s)...`);
-            closeModal(bulkScanModal);
-            input.value = '';
+// NEW: Security Insights & Protection Status support
+async function getLastScans() {
+    // Try chrome.storage.local first (extension), fall back to localStorage
+    return new Promise((resolve) => {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.get(['scanHistory'], (res) => {
+                const arr = res?.scanHistory || null;
+                if (arr && Array.isArray(arr)) return resolve(arr);
+                // fallback to localStorage
+                try {
+                    const ls = localStorage.getItem('phishNetScans');
+                    return resolve(ls ? JSON.parse(ls) : []);
+                } catch (e) { return resolve([]); }
+            });
+        } else {
+            try {
+                const ls = localStorage.getItem('phishNetScans');
+                return resolve(ls ? JSON.parse(ls) : []);
+            } catch (e) { return resolve([]); }
         }
     });
 }
 
-// THREAT REPORT HANDLER
-const threatSubmit = document.getElementById('threat-submit');
-if (threatSubmit) {
-    threatSubmit.addEventListener('click', () => {
-        const url = document.getElementById('threat-url').value.trim();
-        if (url) {
-            showToast('Threat reported successfully!');
-            closeModal(threatModal);
-            document.getElementById('threat-url').value = '';
-            document.getElementById('threat-desc').value = '';
+// Seed dummy scan data if none exists (for demo / local testing)
+async function seedDummyScans() {
+    const existing = await new Promise((resolve) => {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.get(['scanHistory'], (res) => resolve(res?.scanHistory || []));
+        } else {
+            try {
+                const ls = localStorage.getItem('phishNetScans');
+                resolve(ls ? JSON.parse(ls) : []);
+            } catch (e) { resolve([]); }
         }
+    });
+
+    if (existing && existing.length > 0) return; // don't overwrite existing data
+
+    const now = Date.now();
+    const samples = [
+        { target: 'http://malicious.example', url: 'http://malicious.example', result: 'Malicious', timestamp: now - 1000 * 60 * 60 },
+        { target: 'http://suspicious.example', url: 'http://suspicious.example', result: 'Suspicious', timestamp: now - 1000 * 60 * 60 * 4 },
+        { target: 'http://safe.example', url: 'http://safe.example', result: 'Safe', timestamp: now - 1000 * 60 * 60 * 24 },
+        { target: 'http://phish.example', url: 'http://phish.example', result: 'Malicious', timestamp: now - 1000 * 60 * 30 },
+        { target: 'user@example.com', url: 'mailto:user@example.com', result: 'Suspicious', timestamp: now - 1000 * 60 * 10 }
+    ];
+
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.set({ scanHistory: samples }, () => console.log('Seeded scanHistory in chrome.storage.local'));
+    } else {
+        try {
+            localStorage.setItem('phishNetScans', JSON.stringify(samples));
+            console.log('Seeded scanHistory in localStorage');
+        } catch (e) {
+            console.warn('Failed to seed localStorage scanHistory', e);
+        }
+    }
+}
+
+function formatResultIcon(result) {
+    if (!result) return '✅';
+    const r = String(result).toLowerCase();
+    if (r.includes('malicious') || r.includes('malware')) return '⚠️';
+    if (r.includes('suspicious')) return '🟡';
+    return '✅';
+}
+
+async function populateSecurityInsights() {
+    const listEl = document.getElementById('insights-list');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    const scans = await getLastScans();
+
+    if (!Array.isArray(scans) || scans.length === 0) {
+        listEl.innerHTML = '<p>No recent alerts.</p>';
+        populateSecurityTips();
+        return;
+    }
+
+    // Filter only Malicious/Suspicious
+    const alerts = scans.filter(s => s.result && /malicious|suspicious|malware/i.test(s.result));
+    const top = alerts.slice(0, 5);
+
+    if (top.length === 0) {
+        listEl.innerHTML = '<p>No recent malicious or suspicious results.</p>';
+        populateSecurityTips();
+        return;
+    }
+
+    top.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'insight-card';
+        const when = item.timestamp ? new Date(item.timestamp).toLocaleString() : 'Unknown';
+        const icon = formatResultIcon(item.result);
+        card.innerHTML = `
+            <div class="insight-left">${icon}</div>
+            <div class="insight-body">
+                <div class="insight-target">${item.target || item.url || '—'}</div>
+                <div class="insight-meta">${item.result} • ${when}</div>
+            </div>
+        `;
+        // expose full target via title (hover tooltip)
+        const targetEl = card.querySelector('.insight-target');
+        if (targetEl) targetEl.title = item.target || item.url || '';
+        listEl.appendChild(card);
+    });
+
+    // populate tips below insights
+    populateSecurityTips();
+
+        // ensure full value is available on hover
+        const tt = row.querySelector('.threat-target');
+        if (tt) tt.title = item.target || '';
+
+}
+
+// Simple security tips (static list for now)
+function populateSecurityTips() {
+    const tipsEl = document.getElementById('security-tips');
+    if (!tipsEl) return;
+    const tips = [
+        { title: 'Verify sender', desc: 'Check email addresses carefully and avoid clicking links from unknown senders.' },
+        { title: 'Hover links', desc: 'Hover over links to inspect the real URL before clicking.' },
+        { title: 'Use strong passwords', desc: 'Use unique, complex passwords and enable two-factor authentication where possible.' },
+        { title: 'Update software', desc: 'Keep your browser and extensions up to date to receive the latest security fixes.' },
+        { title: 'Avoid public Wi‑Fi', desc: 'Avoid logging into sensitive accounts on public Wi‑Fi; use a trusted VPN when necessary.' }
+    ];
+    tipsEl.innerHTML = '';
+    tips.forEach(t => {
+        const card = document.createElement('div');
+        card.className = 'tip-card';
+        card.innerHTML = `<div class="tip-title">${t.title}</div><div class="tip-desc">${t.desc}</div>`;
+        tipsEl.appendChild(card);
+    });
+}
+
+// Top Threats (dummy data for now)
+async function populateTopThreats() {
+    const listEl = document.getElementById('top-threats-list');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
+    // Dummy high-priority threats
+    const now = Date.now();
+    const threats = [
+        { target: 'http://malicious.example', type: 'Malicious', timestamp: now - 1000 * 60 * 25 },
+        { target: 'http://phish.example/login', type: 'Malicious', timestamp: now - 1000 * 60 * 60 },
+        { target: 'user@example.com', type: 'Suspicious', timestamp: now - 1000 * 60 * 90 },
+        { target: 'http://suspicious.example', type: 'Suspicious', timestamp: now - 1000 * 60 * 240 }
+    ];
+
+    threats.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'threat-item';
+
+        const icon = (item.type && /malicious/i.test(item.type)) ? '⚠️' : '🟡';
+
+        row.innerHTML = `
+            <div class="threat-left">
+                <div class="threat-icon">${icon}</div>
+                <div class="threat-body">
+                    <div class="threat-target">${item.target}</div>
+                    <div class="threat-meta">${item.type} • ${new Date(item.timestamp).toLocaleString()}</div>
+                </div>
+            </div>
+            <div>
+                <button class="view-details-btn">View Details</button>
+            </div>
+        `;
+
+        listEl.appendChild(row);
     });
 }
 
@@ -896,6 +1020,13 @@ async function initializeApp() {
 
     // Pull stored profile picture if present
     await hydrateProfilePictureFromStorage();
+
+    // Seed demo scan data if none exists (useful while API not connected)
+    try {
+        await seedDummyScans();
+    } catch (e) {
+        console.warn('Failed to seed dummy scans:', e);
+    }
 
     // Fetch profile picture/settings from backend if available
     if (token && USE_SETTINGS_API) {

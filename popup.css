@@ -103,7 +103,7 @@ body {
 }
 
 .username {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--color-text-primary);
     margin-right: 0;
@@ -114,6 +114,32 @@ body {
     align-items: center;
     justify-content: center;
     margin-right: 4px;
+}
+
+/* User info layout in header: stack name and email, nudge upward */
+.user-info {
+    display: flex;
+    align-items: center;
+}
+.user-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: -2px; /* smaller upward nudge */
+}
+.user-email {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.75);
+    margin-top: 0px; /* reduce gap between name and email */
+    font-weight: 500;
+    line-height: 1;
+}
+
+/* Allow long emails to wrap or break so the full address can be visible */
+.user-text, .user-email {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .avatar-circle {
@@ -794,6 +820,150 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+/* Security Insights styles */
+.insights-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 320px;
+    overflow: auto;
+}
+.insight-card {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 10px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.03);
+}
+.insight-left {
+    font-size: 1.4rem;
+    width: 36px;
+    text-align: center;
+}
+.insight-body .insight-target {
+    font-weight: 700;
+    font-size: 0.9rem;
+    white-space: normal; /* allow line-wrapping for long URLs/emails */
+    overflow-wrap: anywhere;
+}
+.insight-body .insight-meta {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.75);
+}
+
+.status-line {
+    margin: 6px 0;
+    font-size: 0.9rem;
+}
+
+/* Security Tips */
+.security-tips {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+}
+.tip-card {
+    padding: 8px 10px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.03);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.92);
+}
+.tip-card .tip-title {
+    font-weight: 700;
+    font-size: 0.88rem;
+    margin-bottom: 4px;
+}
+.tip-card .tip-desc {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.8);
+}
+
+/* Top Threats list */
+.top-threats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 360px;
+    overflow: auto;
+    margin-top: 6px;
+}
+.top-threats-list {
+    padding-right: 10px; /* ensure button doesn't overlap scrollbar */
+}
+.threat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.03);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.threat-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+}
+.threat-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1 1 auto; /* allow left area to take available space */
+    min-width: 0; /* allow contents to truncate */
+}
+.threat-icon {
+    font-size: 1.4rem;
+    width: 36px;
+    text-align: center;
+    flex: 0 0 36px;
+}
+.threat-body {
+    min-width: 0; /* allow ellipsis */
+    overflow: hidden;
+}
+.threat-body .threat-target {
+    font-weight: 700;
+    font-size: 0.92rem;
+    /* Allow long URLs/emails to wrap instead of clipping with ellipsis */
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+.threat-body .threat-meta {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.75);
+}
+.threat-item > div:last-child {
+    flex: 0 0 auto; /* keep right column fixed so button stays inside */
+    display: flex;
+    align-items: center;
+}
+
+.view-details-btn {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: none;
+    background: rgba(11,99,217,0.12);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.view-details-btn:hover {
+    background: rgba(11,99,217,0.18);
+}
+
+/* Ensure threat item layout keeps button inside container */
+.threat-item { 
+    align-items: center;
 }
 
 .form-group {

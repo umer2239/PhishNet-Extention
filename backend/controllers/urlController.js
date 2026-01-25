@@ -126,8 +126,9 @@ exports.updateUrlStatus = async (req, res, next) => {
     const { id } = req.params;
     const { status, userAction } = req.body;
 
-    const urlCheck = await URLCheckHistory.findByIdAndUpdate(
-      id,
+    // Ensure the record belongs to the requesting user
+    const urlCheck = await URLCheckHistory.findOneAndUpdate(
+      { _id: id, userId: req.user.id },
       { status, userAction, updatedAt: new Date() },
       { new: true, runValidators: true }
     );
@@ -135,7 +136,7 @@ exports.updateUrlStatus = async (req, res, next) => {
     if (!urlCheck) {
       return res.status(404).json({
         success: false,
-        message: 'URL check record not found'
+        message: 'URL check record not found or does not belong to the user'
       });
     }
 
@@ -160,12 +161,13 @@ exports.deleteUrlRecord = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const urlCheck = await URLCheckHistory.findByIdAndDelete(id);
+    // Ensure deletion only removes records owned by the requester
+    const urlCheck = await URLCheckHistory.findOneAndDelete({ _id: id, userId: req.user.id });
 
     if (!urlCheck) {
       return res.status(404).json({
         success: false,
-        message: 'URL check record not found'
+        message: 'URL check record not found or does not belong to the user'
       });
     }
 
