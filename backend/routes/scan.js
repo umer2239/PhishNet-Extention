@@ -15,6 +15,49 @@ const {
   deleteUrlRecord
 } = require('../controllers/urlController');
 
+// PUBLIC ENDPOINT for extension background scanner (no auth required)
+// @route   POST /api/v1/urls/scan
+// @desc    Scan URL with Google Safe Browsing (public)
+// @access  Public
+router.post('/scan', async (req, res, next) => {
+  try {
+    const { url } = req.body || {};
+
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: 'URL is required'
+      });
+    }
+
+    // Import the safe browsing utility
+    const { scanUrlWithGoogleSafeBrowsing } = require('../utils/safeBrowsing');
+    
+    const apiKey = process.env.GOOGLE_SAFE_BROWSING_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({
+        success: false,
+        message: 'Safe Browsing API not configured'
+      });
+    }
+
+    const { status, threats } = await scanUrlWithGoogleSafeBrowsing(url, apiKey);
+    
+    res.status(200).json({
+      success: true,
+      status,
+      threats: threats || [],
+      meta: { url, timestamp: new Date().toISOString() }
+    });
+  } catch (error) {
+    console.error('Scan URL error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Scan failed'
+    });
+  }
+});
+
 // @route   POST /api/v1/urls/check
 // @desc    Check and record URL
 // @access  Private

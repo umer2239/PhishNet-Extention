@@ -5,6 +5,7 @@ const API_BASE_URL = 'http://localhost:5000/api/v1';
 const WEBSITE_URL = 'http://localhost:3000'; // Change to your website URL
 const USE_SETTINGS_API = false; // Toggle to avoid 404s when settings endpoint is unavailable
 const PRICING_PAGE_URL = 'http://localhost:3000/pricing.html';
+const PROTECTION_STORAGE_KEY = 'phishnetProtectionState';
 
 // Expose flag for other scripts
 window.__PHISHNET_USE_SETTINGS_API = USE_SETTINGS_API;
@@ -315,6 +316,46 @@ function loadState() {
 // SAVE STATE
 function saveState() {
     localStorage.setItem('phishNetState', JSON.stringify(state));
+    persistProtectionState();
+}
+
+// Persist protection state for background worker
+function persistProtectionState() {
+    if (!chrome?.storage?.local) return;
+    const payload = {
+        isProtected: state.isProtected,
+        alwaysOn: state.alwaysOn,
+        timerEndTime: state.timerEndTime || 0,
+        updatedAt: Date.now()
+    };
+    chrome.storage.local.set({ [PROTECTION_STORAGE_KEY]: payload });
+    notifyBackgroundProtectionState(payload);
+}
+
+// Sync protection state from background/storage
+async function restoreProtectionState() {
+    if (!chrome?.storage?.local) return;
+    return new Promise((resolve) => {
+        chrome.storage.local.get([PROTECTION_STORAGE_KEY], (res) => {
+            const stored = res?.[PROTECTION_STORAGE_KEY];
+            if (stored && typeof stored === 'object') {
+                state.isProtected = !!stored.isProtected;
+                state.alwaysOn = !!stored.alwaysOn;
+                if (stored.timerEndTime) state.timerEndTime = stored.timerEndTime;
+            }
+            resolve();
+        });
+    });
+}
+
+function notifyBackgroundProtectionState(payload) {
+    try {
+        if (chrome?.runtime?.sendMessage) {
+            chrome.runtime.sendMessage({ type: 'phishnet.protection-state', payload });
+        }
+    } catch (err) {
+        console.warn('Failed to broadcast protection state:', err);
+    }
 }
 
 // Expose saveState so settings.js can persist profile/avatar updates
@@ -820,62 +861,24 @@ if (settingsBackBtn) {
 }
 
 // NEW: Security Insights & Protection Status support
+const SCAN_HISTORY_KEY = 'phishnetScanHistory';
+
 async function getLastScans() {
-    // Try chrome.storage.local first (extension), fall back to localStorage
     return new Promise((resolve) => {
         if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-            chrome.storage.local.get(['scanHistory'], (res) => {
-                const arr = res?.scanHistory || null;
-                if (arr && Array.isArray(arr)) return resolve(arr);
-                // fallback to localStorage
-                try {
-                    const ls = localStorage.getItem('phishNetScans');
-                    return resolve(ls ? JSON.parse(ls) : []);
-                } catch (e) { return resolve([]); }
+            chrome.storage.local.get([SCAN_HISTORY_KEY], (res) => {
+                const arr = res?.[SCAN_HISTORY_KEY] || [];
+                return resolve(Array.isArray(arr) ? arr : []);
             });
         } else {
-            try {
-                const ls = localStorage.getItem('phishNetScans');
-                return resolve(ls ? JSON.parse(ls) : []);
-            } catch (e) { return resolve([]); }
+            resolve([]);
         }
     });
 }
 
 // Seed dummy scan data if none exists (for demo / local testing)
 async function seedDummyScans() {
-    const existing = await new Promise((resolve) => {
-        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-            chrome.storage.local.get(['scanHistory'], (res) => resolve(res?.scanHistory || []));
-        } else {
-            try {
-                const ls = localStorage.getItem('phishNetScans');
-                resolve(ls ? JSON.parse(ls) : []);
-            } catch (e) { resolve([]); }
-        }
-    });
-
-    if (existing && existing.length > 0) return; // don't overwrite existing data
-
-    const now = Date.now();
-    const samples = [
-        { target: 'http://malicious.example', url: 'http://malicious.example', result: 'Malicious', timestamp: now - 1000 * 60 * 60 },
-        { target: 'http://suspicious.example', url: 'http://suspicious.example', result: 'Suspicious', timestamp: now - 1000 * 60 * 60 * 4 },
-        { target: 'http://safe.example', url: 'http://safe.example', result: 'Safe', timestamp: now - 1000 * 60 * 60 * 24 },
-        { target: 'http://phish.example', url: 'http://phish.example', result: 'Malicious', timestamp: now - 1000 * 60 * 30 },
-        { target: 'user@example.com', url: 'mailto:user@example.com', result: 'Suspicious', timestamp: now - 1000 * 60 * 10 }
-    ];
-
-    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        chrome.storage.local.set({ scanHistory: samples }, () => console.log('Seeded scanHistory in chrome.storage.local'));
-    } else {
-        try {
-            localStorage.setItem('phishNetScans', JSON.stringify(samples));
-            console.log('Seeded scanHistory in localStorage');
-        } catch (e) {
-            console.warn('Failed to seed localStorage scanHistory', e);
-        }
-    }
+    // No auto-seeding in extension — wait for real scans
 }
 
 function formatResultIcon(result) {
@@ -893,46 +896,44 @@ async function populateSecurityInsights() {
     const scans = await getLastScans();
 
     if (!Array.isArray(scans) || scans.length === 0) {
-        listEl.innerHTML = '<p>No recent alerts.</p>';
+        listEl.innerHTML = '<p style="color: #94a3b8; padding: 20px; text-align: center;">No scans yet. Navigate to a website with protection enabled to see results.</p>';
         populateSecurityTips();
         return;
     }
 
-    // Filter only Malicious/Suspicious
-    const alerts = scans.filter(s => s.result && /malicious|suspicious|malware/i.test(s.result));
-    const top = alerts.slice(0, 5);
-
-    if (top.length === 0) {
-        listEl.innerHTML = '<p>No recent malicious or suspicious results.</p>';
-        populateSecurityTips();
-        return;
-    }
+    // Show all scans (not just alerts)
+    const top = scans.slice(0, 10);
 
     top.forEach(item => {
         const card = document.createElement('div');
         card.className = 'insight-card';
         const when = item.timestamp ? new Date(item.timestamp).toLocaleString() : 'Unknown';
         const icon = formatResultIcon(item.result);
+        
+        // Extract hostname from URL for cleaner display
+        let displayUrl = item.url || '—';
+        try {
+            const parsed = new URL(item.url);
+            displayUrl = parsed.hostname || item.url;
+        } catch (e) {
+            // Keep as-is if not a valid URL
+        }
+        
         card.innerHTML = `
             <div class="insight-left">${icon}</div>
             <div class="insight-body">
-                <div class="insight-target">${item.target || item.url || '—'}</div>
+                <div class="insight-target">${displayUrl}</div>
                 <div class="insight-meta">${item.result} • ${when}</div>
             </div>
         `;
-        // expose full target via title (hover tooltip)
+        // expose full URL via title (hover tooltip)
         const targetEl = card.querySelector('.insight-target');
-        if (targetEl) targetEl.title = item.target || item.url || '';
+        if (targetEl) targetEl.title = item.url || '';
         listEl.appendChild(card);
     });
 
     // populate tips below insights
     populateSecurityTips();
-
-        // ensure full value is available on hover
-        const tt = row.querySelector('.threat-target');
-        if (tt) tt.title = item.target || '';
-
 }
 
 // Simple security tips (static list for now)
@@ -997,6 +998,10 @@ async function populateTopThreats() {
 async function initializeApp() {
     // Load persisted UI state first (may include profile picture)
     loadState();
+
+    // Rehydrate protection toggle from background-shared storage
+    await restoreProtectionState();
+    updateUI();
 
     // Check if user is already logged in
     const token = await PhishNetAPI.getAccessToken();
