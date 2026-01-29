@@ -38,10 +38,17 @@ function disableButtons() {
 function sendDecision(decision) {
     if (!targetUrl) return;
     const statusEl = document.getElementById('status-text');
-    chrome.runtime.sendMessage({ type: 'warning-decision', decision, url: targetUrl, tabId }, () => {
+    chrome.runtime.sendMessage({ type: 'warning-decision', decision, url: targetUrl, tabId }, (response) => {
+        if (decision === 'continue') {
+            // Continue navigates to the site (background handles this)
+            return;
+        }
+        
         if (decision === 'stay_safe') {
-            if (statusEl) statusEl.textContent = 'Navigation blocked.';
+            // Show blocked message while background navigates back
+            if (statusEl) statusEl.textContent = 'Navigation blocked. Going back...';
             disableButtons();
+            // Background worker will handle the navigation back
         }
     });
 }

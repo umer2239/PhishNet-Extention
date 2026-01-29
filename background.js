@@ -3,7 +3,7 @@ const PROTECTION_STORAGE_KEY = 'phishnetProtectionState';
 const SCAN_HISTORY_KEY = 'phishnetScanHistory';
 const MAX_SCAN_HISTORY = 50; // Keep last 50 scans
 const SCAN_ENDPOINT = 'http://localhost:5000/api/v1/urls/scan';
-const SCAN_TIMEOUT_MS = 3000;
+const SCAN_TIMEOUT_MS = 2000;
 const SCAN_CACHE_TTL_MS = 300000; // 5 minutes
 
 let protectionState = { isProtected: false, alwaysOn: false };
@@ -55,7 +55,8 @@ function init() {
             }
 
             if (decision === 'stay_safe') {
-                // Keep the user on the warning page; nothing else to do.
+                // Go back in browser history using Chrome API
+                chrome.tabs.goBack(tabId);
             }
 
             sendResponse?.({ ok: true });
